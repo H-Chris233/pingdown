@@ -3,6 +3,7 @@ use std::thread::sleep;
 use std::time::Duration;
 
 fn main() {
+    cmd_to_utf8();
     println!("Started running...");
     let ip1 = "192.168.3.8";
     let ip2 = "192.168.3.9";
@@ -28,25 +29,25 @@ fn loop_60sec(ip1:&str ,ip2:&str) {
 
 fn get_status(ip:&str) -> String {
     println!("Started clienting {}..." ,ip);
-    let command = Command::new("cmd")
+    let output = Command::new("cmd")
         .arg("/C")
         .arg(format!("ping {} -n 1" ,ip))
         .output()
         .expect("I/O ERROR!!!");
-    let status = String::from_utf8_lossy(&command.stdout);
+    let status = String::from_utf8_lossy(&output.stdout);
     let status =  status.to_string();
     status
 }
 
-fn patch_status(ip:&str) -> &str {
+fn patch_status(ip:&str) -> bool {
     let status = get_status(ip);
     println!("Started patching {}..." ,ip);
-    if status.contains("无法访问目标主机") {
-        println!("Request timed out.");
-        return "Request timed out.";
-    }else{
+    if status.contains("TTL") {
         println!("fine.");
-        return "fine."
+        return true;
+    }else{
+        println!("Request timed out.");
+        return false;
     }
 
 }
@@ -54,8 +55,8 @@ fn patch_status(ip:&str) -> &str {
 fn verify(ip1:&str ,ip2:&str ,secs:i32) -> bool {
     let status1 = patch_status(ip1);
     let status2 = patch_status(ip2);
-    println!("{} secs for the next loop..." ,secs);
-    if status1 == "Request timed out." && status2 == "Request timed out." {
+    println!("{} secs left for the next loop..." ,secs);
+    if status1 == false && status2 == false {
         return false;
     }else{
         return true;
@@ -90,3 +91,11 @@ fn shutdown() {
         .expect("I/O ERROR!!!");
 }
 
+
+fn cmd_to_utf8() {
+    let _command = Command::new("cmd")
+        .arg("/C")
+        .arg("chcp 65001")
+        .output()
+        .expect("I/O ERROR!!!");
+}
