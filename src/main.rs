@@ -11,11 +11,12 @@ fn main() {
 }
 
 fn loop_60sec(ip1:&str ,ip2:&str) {
+    let secs = 60;
     println!("Started 60sec loop...");
     let mut i:i64 = 0;
     loop{
         println!("Looped for {i} times...");
-        let status = verify(ip1,ip2);
+        let status = verify(ip1,ip2,secs);
         if status == false {
             loop_20sec(ip1 ,ip2);
             continue;
@@ -26,7 +27,7 @@ fn loop_60sec(ip1:&str ,ip2:&str) {
 }
 
 fn get_status(ip:&str) -> String {
-    println!("Started clienting...");
+    println!("Started clienting {}..." ,ip);
     let command = Command::new("cmd")
         .arg("/C")
         .arg(format!("ping {} -n 1" ,ip))
@@ -37,23 +38,23 @@ fn get_status(ip:&str) -> String {
     status
 }
 
-fn patch_status(status:&str) -> &str {
-    println!("Started patching...");
-    let status = get_status(status);
+fn patch_status(ip:&str) -> &str {
+    let status = get_status(ip);
+    println!("Started patching {}..." ,ip);
     if status.contains("无法访问目标主机") {
         println!("Request timed out.");
         return "Request timed out.";
     }else{
-        println!("...");
+        println!("fine.");
         return "fine."
     }
 
 }
 
-fn verify(ip1:&str,ip2:&str) -> bool {
-    println!("Started verifying...");
+fn verify(ip1:&str ,ip2:&str ,secs:i32) -> bool {
     let status1 = patch_status(ip1);
     let status2 = patch_status(ip2);
+    println!("{} secs for the next loop..." ,secs);
     if status1 == "Request timed out." && status2 == "Request timed out." {
         return false;
     }else{
@@ -62,11 +63,12 @@ fn verify(ip1:&str,ip2:&str) -> bool {
 }
 
 fn loop_20sec(ip1:&str ,ip2:&str) {
+    let secs = 20;
     let mut time_left = 3;
     println!("Warning!!! Connection lost!!!!");
     loop{
         println!("{time_left} times left for shutting down...");
-        let status = verify(ip1,ip2);
+        let status = verify(ip1,ip2,secs);
         if status == true {
             break;
         }else if time_left == 0 {
