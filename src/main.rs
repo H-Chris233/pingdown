@@ -6,23 +6,21 @@ fn main() {
     println!("Started running...");
     let ip1 = "192.168.3.8";
     let ip2 = "192.168.3.9";
+    loop_60sec(ip1 ,ip2);
 
 }
 
-fn loop_60sec() {
+fn loop_60sec(ip1:&str ,ip2:&str) {
     println!("Started 60sec loop...");
     let mut i:i64 = 0;
     loop{
         println!("Looped for {i} times...");
         let status = verify(ip1,ip2);
-        if status = false {
-            loop_20sec();
+        if status == false {
+            loop_20sec(ip1 ,ip2);
             continue;
         }
         sleep(Duration::from_secs(60));
-
-
-
         i += 1;
     }
 }
@@ -39,7 +37,7 @@ fn get_status(ip:&str) -> String {
     status
 }
 
-fn patch_status(get_status():&str) -> &str {
+fn patch_status(status:&str) -> &str {
     println!("Started patching...");
     let status = get_status(status);
     if status.contains("无法访问目标主机") {
@@ -63,7 +61,7 @@ fn verify(ip1:&str,ip2:&str) -> bool {
     }
 }
 
-fn loop_20sec() {
+fn loop_20sec(ip1:&str ,ip2:&str) {
     let mut time_left = 3;
     println!("Warning!!! Connection lost!!!!");
     loop{
@@ -87,6 +85,6 @@ fn shutdown() {
         .arg("/C")
         .arg("shutdown /s /t 0")
         .output()
-        .expect("ERROR!!!");
+        .expect("I/O ERROR!!!");
 }
 
