@@ -37,9 +37,9 @@ fn get_status(ip:&str) -> String {
     status
 }
 
-fn patch_status(ip:&str) -> bool {
+fn check_status(ip:&str) -> bool {
     let status = get_status(ip);
-    println!("Started patching {}..." ,ip);
+    println!("Started checking {}..." ,ip);
     if status.contains("TTL") {
         println!("fine.");
         return true;
@@ -51,8 +51,8 @@ fn patch_status(ip:&str) -> bool {
 }
 
 fn verify(ip1:&str ,ip2:&str ,secs:i32) -> bool {
-    let status1 = patch_status(ip1);
-    let status2 = patch_status(ip2);
+    let status1 = check_status(ip1);
+    let status2 = check_status(ip2);
     println!("{} secs left for the next loop..." ,secs);
     if status1 == false && status2 == false {
         return false;
