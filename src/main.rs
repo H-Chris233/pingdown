@@ -14,16 +14,14 @@ fn main() {
 fn loop_60sec(ip1:&str ,ip2:&str) {
     let secs = 60;
     println!("Started 60sec loop...");
-    let mut i:i64 = 0;
-    loop{
-        println!("Looped for {i} times...");
+    for mut i in 1.. {
+        println!("60sec Looped for {i} times...");
         let status = verify(ip1,ip2,secs);
         if status == false {
             loop_20sec(ip1 ,ip2);
             continue;
         }
         sleep(Duration::from_secs(60));
-        i += 1;
     }
 }
 
