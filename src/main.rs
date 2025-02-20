@@ -21,11 +21,12 @@ fn main() {
 
 }
 
+#[allow(dead_code)]
 fn get_ip() -> Vec<String> {
     let mut args = vec![];
     for arg in env::args().skip(1) {
-        args.push(arg)
-            .expect("Error getting argument");
+        args.push(arg);
+            //.expect("Error getting argument");
         if args.len() == 0 {
             println!("Useage:ping_shutdown ip ip ...");
             
@@ -51,7 +52,10 @@ fn loop_60sec(ip1:&str ,ip2:&str) {
 fn get_status(ip:&str) -> String {
     let command = format!("ping {} -n 1" ,ip);
     let message = format!("Started clienting {}..." ,ip);
-    let output = run_command(&command, &message);
+    let output = match run_command(&command, &message){
+    Ok(output) => output,
+    Err(_) => error(),
+    };
     
     let status = String::from_utf8_lossy(&output.stdout);
     let status =  status.to_string();
@@ -103,36 +107,40 @@ fn loop_20sec(ip1:&str ,ip2:&str) {
 }
 
 fn shutdown() {
-    run_command(SHUTDOWN_COMMAND, "Started shutting down...");
+    let _ =run_command(SHUTDOWN_COMMAND, "Started shutting down...");
 }
 
 #[cfg(windows)]
-fn run_command(command: &str, message: &str) -> Output {
+fn run_command(command: &str, message: &str) -> Result<Output, std::io::Error> {
     println!("{}", message);
     let output = Command::new("cmd")
         .arg("/C")
         .arg(command)
-        .output()
-        .expect("I/O ERROR!!!");
-    output
+        .output()?;
+    Ok(output)
 }
 
 #[cfg(unix)]
-fn run_command(command: &str, message: &str) -> Output {
+fn run_command(command: &str, message: &str) -> Result<Output, std::io::Error> {
     println!("{}", message);
     let output = Command::new("sh")
         .arg("-c")
         .arg(command)
-        .output()
-        .expect("I/O ERROR!!!");
-    output
+        .output()?;
+    Ok(output)
 }
 
 #[cfg(windows)]
 fn cmd_to_utf8() {
-    let _command = Command::new("cmd")
+    let _ = Command::new("cmd")
         .arg("/C")
         .arg("chcp 65001")
         .output()
         .expect("I/O ERROR!!!");
 }
+
+fn error() -> ! {
+    println!("An error occured,please send an email to h-chris233@qq.com or open a issue to help me improve, tanks!");
+    std::process::exit(1);
+    
+    }
