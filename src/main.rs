@@ -3,12 +3,15 @@ use std::thread::sleep;
 use std::time::Duration;
 use std::process::Output;
 use std::env;
+use std::io;
 
 #[cfg(windows)]
 const SHUTDOWN_COMMAND: &str = "shutdown /s /t 0";
 
 #[cfg(unix)]
 const SHUTDOWN_COMMAND: &str = "poweroff";
+
+const USAGE: &str = "Usage:ping_shutdown -t1 <secs for a normal loop> -t2 <secs for a emergency fast loop>";
 
 fn main() {
     #[cfg(windows)]
@@ -22,13 +25,12 @@ fn main() {
 }
 
 #[allow(dead_code)]
-fn get_ip() -> Vec<String> {
+fn get_args() -> Vec<String> {
     let mut args = vec![];
     for arg in env::args().skip(1) {
         args.push(arg);
-            //.expect("Error getting argument");
         if args.len() == 0 {
-            println!("Useage:ping_shutdown ip ip ...");
+            println!("{}", USAGE);
             
             }
         }
@@ -111,7 +113,7 @@ fn shutdown() {
 }
 
 #[cfg(windows)]
-fn run_command(command: &str, message: &str) -> Result<Output, std::io::Error> {
+fn run_command(command: &str, message: &str) -> io::Result<Output> {
     println!("{}", message);
     let output = Command::new("cmd")
         .arg("/C")
@@ -121,7 +123,7 @@ fn run_command(command: &str, message: &str) -> Result<Output, std::io::Error> {
 }
 
 #[cfg(unix)]
-fn run_command(command: &str, message: &str) -> Result<Output, std::io::Error> {
+fn run_command(command: &str, message: &str) -> io::Result<Output> {
     println!("{}", message);
     let output = Command::new("sh")
         .arg("-c")
