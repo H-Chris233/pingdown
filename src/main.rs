@@ -11,8 +11,6 @@ const SHUTDOWN_COMMAND: &str = "shutdown /s /t 0";
 #[cfg(unix)]
 const SHUTDOWN_COMMAND: &str = "poweroff";
 
-const USAGE: &str = "Usage:ping_shutdown -t <secs for a normal loop> <secs for an emergency fast loop>[DEFAULT:(60, 20)]\n-A[DEFAULT](shutdown when all ips are unavailable)\n-O(shutdown when any ip is unavailable)\n-l [Default:3] <times for emergency loop>";
-
 fn main() {
     #[cfg(windows)]
     cmd_to_utf8();
@@ -131,11 +129,12 @@ fn error() -> ! {
 
 #[allow(dead_code)]
 fn get_args() -> Vec<String> {
+    let usage = "Usage:ping_shutdown -t <secs for a normal loop> <secs for an emergency fast loop>[DEFAULT:(60, 20)]\n-A[DEFAULT](shutdown when all ips are unavailable)\n-O(shutdown when any ip is unavailable)\n-l [Default:3] <times for emergency loop>";
     let mut args = vec![];
     for arg in env::args().skip(1) {
         args.push(arg);
         if args.len() == 0 {
-            println!("{}\nExit in 5 secs...", USAGE);
+            println!("{}\nExit in 5 secs...", usage);
             sleep(Duration::from_secs(5));
             std::process::exit(0);
             }
