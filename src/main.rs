@@ -30,8 +30,9 @@ fn get_args() -> Vec<String> {
     for arg in env::args().skip(1) {
         args.push(arg);
         if args.len() == 0 {
-            println!("{}", USAGE);
-            
+            println!("{}\nExit in 5 secs...", USAGE);
+            sleep(Duration::from_secs(5));
+            std::process::exit(0);
             }
         }
         args    
@@ -142,7 +143,7 @@ fn cmd_to_utf8() {
 }
 
 fn error() -> ! {
-    println!("An error occured,please send an email to h-chris233@qq.com or open a issue to help me improve, tanks!");
+    eprintln!("An error occured,please send an email to h-chris233@qq.com or open a issue to help me improve, tanks!");
     std::process::exit(1);
     
     }
