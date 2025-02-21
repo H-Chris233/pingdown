@@ -119,7 +119,10 @@ fn run_command(command: &str, message: &str) -> io::Result<Output> {
 
 #[cfg(windows)]
 fn cmd_to_utf8() {
-    run_command("chcp 65001", "......");
+    let _ = match run_command("chcp 65001", "......") {
+    Ok(output) => output,
+    Err(_) => error(),
+    };
 }
 
 fn error() -> ! {
