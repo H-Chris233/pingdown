@@ -11,7 +11,7 @@ const SHUTDOWN_COMMAND: &str = "shutdown /s /t 0";
 #[cfg(unix)]
 const SHUTDOWN_COMMAND: &str = "poweroff";
 
-const USAGE: &str = "Usage:ping_shutdown -t1 <secs for a normal loop> -t2 <secs for a emergency fast loop>";
+const USAGE: &str = "Usage:ping_shutdown -t <secs for a normal loop> <secs for an emergency fast loop>[DEFAULT:(60, 20)]\n-A[DEFAULT](shutdown when all ips are unavailable)\n-O(shutdown when any ip is unavailable)\n-l [Default:3] <times for emergency loop>";
 
 fn main() {
     #[cfg(windows)]
@@ -22,20 +22,6 @@ fn main() {
     let ip2 = "192.168.3.9";
     loop_60sec(ip1 ,ip2);
 
-}
-
-#[allow(dead_code)]
-fn get_args() -> Vec<String> {
-    let mut args = vec![];
-    for arg in env::args().skip(1) {
-        args.push(arg);
-        if args.len() == 0 {
-            println!("{}\nExit in 5 secs...", USAGE);
-            sleep(Duration::from_secs(5));
-            std::process::exit(0);
-            }
-        }
-        args    
 }
 
 fn loop_60sec(ip1:&str ,ip2:&str) {
@@ -93,7 +79,7 @@ fn loop_20sec(ip1:&str ,ip2:&str) {
     let secs = 20;
     let mut time_left = 3;
     println!("Warning!!! Connection lost!!!!");
-    println!("Checking web connection every 20 seconds!!");
+    println!("Checking web connection per 20 seconds!!");
     loop{
         println!("{} times left for shutting down...", time_left);
         let status = verify(ip1,ip2,secs);
@@ -141,4 +127,20 @@ fn cmd_to_utf8() {
 fn error() -> ! {
     eprintln!("An error occured,please send an email to h-chris233@qq.com or open a issue to help me improve, tanks!");
     std::process::exit(1);
-    }
+}
+
+#[allow(dead_code)]
+fn get_args() -> Vec<String> {
+    let mut args = vec![];
+    for arg in env::args().skip(1) {
+        args.push(arg);
+        if args.len() == 0 {
+            println!("{}\nExit in 5 secs...", USAGE);
+            sleep(Duration::from_secs(5));
+            std::process::exit(0);
+            }
+        }
+        args    
+}
+
+
