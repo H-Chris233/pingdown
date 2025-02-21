@@ -135,15 +135,10 @@ fn run_command(command: &str, message: &str) -> io::Result<Output> {
 
 #[cfg(windows)]
 fn cmd_to_utf8() {
-    let _ = Command::new("cmd")
-        .arg("/C")
-        .arg("chcp 65001")
-        .output()
-        .expect("I/O ERROR!!!");
+    run_command("chcp 65001", "......");
 }
 
 fn error() -> ! {
     eprintln!("An error occured,please send an email to h-chris233@qq.com or open a issue to help me improve, tanks!");
     std::process::exit(1);
-    
     }
