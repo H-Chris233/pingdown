@@ -1,3 +1,7 @@
+#![allow(dead_code)]
+#![allow(unused)]
+
+use ping_shutdown::*;
 use std::process::Command;
 use std::thread::sleep;
 use std::time::Duration;
@@ -11,6 +15,8 @@ const SHUTDOWN_COMMAND: &str = "shutdown /s /t 0";
 #[cfg(unix)]
 const SHUTDOWN_COMMAND: &str = "poweroff";
 
+const BING: &str = "bing.com";
+
 fn main() {
     #[cfg(windows)]
     cmd_to_utf8();
@@ -19,7 +25,6 @@ fn main() {
     let ip1 = "192.168.3.8";
     let ip2 = "192.168.3.9";
     loop_60sec(ip1 ,ip2);
-
 }
 
 fn loop_60sec(ip1:&str ,ip2:&str) {
@@ -41,7 +46,7 @@ fn get_status(ip:&str) -> String {
     let message = format!("Started clienting {}..." ,ip);
     let output = match run_command(&command, &message){
     Ok(output) => output,
-    Err(_) => error(),
+    Err(_) => error("running command"),
     };
     
     let status = String::from_utf8_lossy(&output.stdout);
@@ -125,24 +130,74 @@ fn cmd_to_utf8() {
     };
 }
 
-fn error() -> ! {
-    eprintln!("An error occured,please send an email to h-chris233@qq.com or open a issue to help me improve, tanks!");
+fn error(message: &str) -> ! {
+    eprintln!("An error occurred when {},please send an email to h-chris233@qq.com or open a issue to help me improve, tanks!", message);
+    sleep(Duration::from_secs(7));
     std::process::exit(1);
 }
 
-#[allow(dead_code)]
 fn get_args() -> Vec<String> {
-    let usage = "Usage:ping_shutdown -t <secs for a normal loop> <secs for an emergency fast loop>[DEFAULT:(60, 20)]\n-A[DEFAULT](shutdown when all ips are unavailable)\n-O(shutdown when any ip is unavailable)\n-l [Default:3] <times for emergency loop>";
+    let usage = "Usage:ping_shutdown -t (<secs for a normal loop>,<secs for an emergency fast loop>)[DEFAULT:(60, 20)]\n-A[DEFAULT](shutdown when all ips are unavailable)\n-O(shutdown when any ip is unavailable)\n-l <times for emergency loop>[Default:3]";
     let mut args = vec![];
-    for arg in env::args().skip(1) {
+    for arg in match env::args().skip(1) {
+        Ok(arg) => arg,
+        Err(_) => error("getting args[in function get_args]"),
+    } {
         args.push(arg);
         if args.len() == 0 {
-            println!("{}\nExit in 5 secs...", usage);
-            sleep(Duration::from_secs(5));
-            std::process::exit(0);
-            }
+            println!("As default,will check the connection with bing.com...")
         }
-        args    
+    }
+    args
 }
+
+
+fn read_args(args: Vec<String>) -> Option<String> {
+    let flag: Option<&str> = None;
+    let mut args_in = ArgsIn {
+        and_or: None,
+        ip: None,
+        secs_for_loop: None,
+        times_for_emergency_loop: None,
+    };
+    for arg in args{
+        match flag {
+            Some("secs_for_loop") => {},
+            Some("times_for_emergency_loop") => {},
+            Some("ip") => {},
+            None => {},
+            _ => error("matching flag[in function read_args]"),
+        }
+        match &arg as &str {
+            "-t" => {let flag = "secs_for_loop";},
+            "-A" => {args_in.and_or = Some(false);},
+            "-O" => {args_in.and_or = Some(true);},
+            "-l" => {let flag = "times_for_emergency_loop";},
+            "-ip" => {let flag = "ip";},
+            _ => error("matching arg"),
+        }
+        
+        
+        
+    }
+    None
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
