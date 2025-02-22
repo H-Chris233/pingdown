@@ -139,10 +139,7 @@ fn error(message: &str) -> ! {
 fn get_args() -> Vec<String> {
     let usage = "Usage:ping_shutdown -t (<secs for a normal loop>,<secs for an emergency fast loop>)[DEFAULT:(60, 20)]\n-A[DEFAULT](shutdown when all ips are unavailable)\n-O(shutdown when any ip is unavailable)\n-l <times for emergency loop>[Default:3]";
     let mut args = vec![];
-    for arg in match env::args().skip(1) {
-        Ok(arg) => arg,
-        Err(_) => error("getting args[in function get_args]"),
-    } {
+    for arg in match env::args().skip(1).collect() {
         args.push(arg);
         if args.len() == 0 {
             println!("As default,will check the connection with bing.com...")
