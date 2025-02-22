@@ -14,30 +14,33 @@ const SHUTDOWN_COMMAND: &str = "shutdown /s /t 0";
 #[cfg(unix)]
 const SHUTDOWN_COMMAND: &str = "poweroff";
 
-const BING: &str = "bing.com";
-
 fn main() {
+    let args_in_struct = ArgsIn::parse();
+    
+    
     #[cfg(windows)]
     cmd_to_utf8();
     
     println!("Started running...");
-    let ip1 = "192.168.3.8";
-    let ip2 = "192.168.3.9";
-    loop_60sec(ip1 ,ip2);
+    let ip = &args_in.ip;
+    let normal_secs = &args_in.secs_for_normal_loop;
+    let emergency_secs = &args_in.secs_for_emergency_loop;
+    let args_in = ();
+    normal_loop(ip, normal_secs);
 }
 
-fn loop_60sec(ip1:&str ,ip2:&str) {
-    let secs = 60;
-    println!("Started 60sec loop...");
+fn normal_loop(ip:&str, normal_secs) {
+    
+    println!("Started {}sec loop...", secs);
     for i in 1.. {
-        let status = verify(ip1,ip2);
+        let status = check_status(ip);
         if status == false {
-            loop_20sec(ip1 ,ip2);
+            emergency_loop(ip, args_in);
             continue;
         }
-        println!("60sec Looped for {} times...", i);
-        println!("{} secs left for the next loop..." ,secs);
-        sleep(Duration::from_secs(60));
+        println!("Normal looped for {} times...", i);
+        println!("{} secs left for the next normal loop..." ,secs);
+        sleep(Duration::from_secs(secs));
     }
 }
 
@@ -46,11 +49,11 @@ fn get_status(ip:&str) -> String {
     let message = format!("Started clienting {}..." ,ip);
     let output = match run_command(&command, &message){
     Ok(output) => output,
-    Err(_) => error("running command"),
+    Err(_) => error("running command[in function get_status]"),
     };
     
     let status = String::from_utf8_lossy(&output.stdout);
-    let status =  status.to_string();
+    let status = status.to_string();
     status
 }
 
@@ -64,38 +67,27 @@ fn check_status(ip:&str) -> bool {
         println!("Request timed out.");
         return false;
     }
-
 }
 
-fn verify(ip1:&str ,ip2:&str) -> bool {
-    let status1 = check_status(ip1);
-    let status2 = check_status(ip2);
-    if status1 == false && status2 == false {
-        return false;
-    }else{
-        return true;
-    }
-}
-
-fn loop_20sec(ip1:&str ,ip2:&str) {
-    let secs = 20;
-    let mut time_left = 3;
+fn emergency_loop(ip:&str, args_in) {
+    let secs = &args_in.secs_for_emergency_loop;
+    let mut time_left = &args_in.times_for_emergency_loop;
     println!("Warning!!! Connection lost!!!!");
-    println!("Checking web connection per 20 seconds!!");
+    println!("Checking web connection per {} seconds!!", secs);
     loop{
         println!("{} times left for shutting down...", time_left);
-        let status = verify(ip1,ip2);
+        let status = check_status(ip);
         if status == true {
             break;
         }else if time_left <= 0 {
             shutdown();
         }
         println!("{} secs left for the next loop..." ,secs);
-        sleep(Duration::from_secs(20));
+        sleep(Duration::from_secs(secs));
         time_left -= 1;
     }
     println!("Reconnected!!!");
-    println!("Exiting 20sec loop...");
+    println!("Exiting {}sec loop...", secs);
 }
 
 fn shutdown() {
@@ -135,10 +127,6 @@ fn error(message: &str) -> ! {
     sleep(Duration::from_secs(7));
     std::process::exit(1);
 }
-
-
-
-
 
 
 
