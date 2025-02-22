@@ -14,7 +14,7 @@ pub struct ArgsIn{
     pub or: String,
     ///time between two normal check [Default: 60]
     #[arg(short = 'n', long, default_value = "60")]
-    pub secs_for_loop: String,
+    pub secs_for_normal_loop: String,
     ///time between two emegency check [Default: 20]
     #[arg(short = 'e', long, default_value = "20")]
     pub secs_for_emergency_loop: String,
