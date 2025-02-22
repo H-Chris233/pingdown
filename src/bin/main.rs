@@ -30,12 +30,13 @@ fn loop_60sec(ip1:&str ,ip2:&str) {
     let secs = 60;
     println!("Started 60sec loop...");
     for i in 1.. {
-        println!("60sec Looped for {} times...", i);
-        let status = verify(ip1,ip2,secs);
+        let status = verify(ip1,ip2);
         if status == false {
             loop_20sec(ip1 ,ip2);
             continue;
         }
+        println!("60sec Looped for {} times...", i);
+        println!("{} secs left for the next loop..." ,secs);
         sleep(Duration::from_secs(60));
     }
 }
@@ -66,10 +67,9 @@ fn check_status(ip:&str) -> bool {
 
 }
 
-fn verify(ip1:&str ,ip2:&str ,secs:i32) -> bool {
+fn verify(ip1:&str ,ip2:&str) -> bool {
     let status1 = check_status(ip1);
     let status2 = check_status(ip2);
-    println!("{} secs left for the next loop..." ,secs);
     if status1 == false && status2 == false {
         return false;
     }else{
@@ -84,12 +84,13 @@ fn loop_20sec(ip1:&str ,ip2:&str) {
     println!("Checking web connection per 20 seconds!!");
     loop{
         println!("{} times left for shutting down...", time_left);
-        let status = verify(ip1,ip2,secs);
+        let status = verify(ip1,ip2);
         if status == true {
             break;
-        }else if time_left == 0 {
+        }else if time_left <= 0 {
             shutdown();
         }
+        println!("{} secs left for the next loop..." ,secs);
         sleep(Duration::from_secs(20));
         time_left -= 1;
     }
