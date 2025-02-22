@@ -87,7 +87,7 @@ fn loop_20sec(ip1:&str ,ip2:&str) {
         let status = verify(ip1,ip2);
         if status == true {
             break;
-        }else if time_left == 0 {
+        }else if time_left <= 0 {
             shutdown();
         }
         println!("{} secs left for the next loop..." ,secs);
