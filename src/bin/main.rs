@@ -64,7 +64,7 @@ fn get_status(ip: &str) -> String {
 fn check_status(ip: &str) -> bool {
     let status = get_status(ip);
     println!("Started checking {}...", ip);
-    if status.contains("TTL") {
+    if status.contains("TTL") || status.contains("ttl") {
         println!("fine.");
         return true;
     } else {
