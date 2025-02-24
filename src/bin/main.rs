@@ -1,150 +1,171 @@
 #![allow(dead_code)]
 #![allow(unused)]
 
-use ping_shutdown::*;
 use std::process::Command;
-use std::thread::sleep;
-use std::time::Duration;
 use std::process::Output;
+use std::time::Duration;
+use ping_shutdown::*;
+use std::thread;
 use std::io;
 
-#[cfg(windows)]
-const SHUTDOWN_COMMAND: &str = "shutdown /s /t 0";
-
-#[cfg(unix)]
-const SHUTDOWN_COMMAND: &str = "poweroff";
-
-const BING: &str = "bing.com";
-
 fn main() {
+    let args_in = ArgsIn::parse();
+
     #[cfg(windows)]
     cmd_to_utf8();
     
+    
+    
+    
     println!("Started running...");
-    let ip1 = "192.168.3.8";
-    let ip2 = "192.168.3.9";
-    loop_60sec(ip1 ,ip2);
+    let ip = &args_in.ip.clone();
+    normal_loop(ip, &args_in);
 }
 
-fn loop_60sec(ip1:&str ,ip2:&str) {
-    let secs = 60;
-    println!("Started 60sec loop...");
+fn normal_loop(ip: &str, args_in: &ArgsIn) {
+    let secs: u64 = match args_in.secs_for_normal_loop.parse() {
+        Ok(secs) => secs,
+        Err(_) => {
+            println!("Please check your input.");
+            error("turning input to a number[in function normal_loop]")
+        }
+    };
+    println!("Started {}sec loop...", secs);
     for i in 1.. {
-        let status = verify(ip1,ip2);
+
+        let status = get_status(ip);
+
         if status == false {
-            loop_20sec(ip1 ,ip2);
+            emergency_loop(ip, args_in);
             continue;
         }
-        println!("60sec Looped for {} times...", i);
-        println!("{} secs left for the next loop..." ,secs);
-        sleep(Duration::from_secs(60));
+
+        println!("Normal looped for {} times...", i);
+        println!("{} secs left for the next normal loop...", secs);
+        sleep(secs);
+
     }
 }
 
-fn get_status(ip:&str) -> String {
-    let command = format!("ping {} -n 1" ,ip);
-    let message = format!("Started clienting {}..." ,ip);
-    let output = match run_command(&command, &message){
-    Ok(output) => output,
-    Err(_) => error("running command"),
+fn get_status(ip: &str) -> bool {
+    let command = format!("ping -c 1 {}", ip);
+    let message = format!("Started clienting {}...", ip);
+    let output = match run_command(&command, Some(&message)) {
+        Ok(output) => output,
+        Err(_) => error("running command[in function get_status]"),
+    };
+    let status = String::from_utf8_lossy(&output.stdout);
+    let status = status.to_string();
+    println!("Started checking {}...", ip);
+    if status.contains("TTL") || status.contains("ttl") {
+         println!("fine.");
+         true
+    } else {
+          println!("Request timed out.");
+          false
+    }
+}
+
+fn check_status(ip: &str, args_in: &ArgsIn) -> bool {
+    let status = get_status(ip);
+    let and_or: bool = match args_in.and_or.as_str() {
+        "" => true,
+        "None" => false,
+        _ => error("reading a bad argument"),
     };
     
-    let status = String::from_utf8_lossy(&output.stdout);
-    let status =  status.to_string();
-    status
+    true
 }
 
-fn check_status(ip:&str) -> bool {
-    let status = get_status(ip);
-    println!("Started checking {}..." ,ip);
-    if status.contains("TTL") {
-        println!("fine.");
-        return true;
-    }else{
-        println!("Request timed out.");
-        return false;
-    }
-
-}
-
-fn verify(ip1:&str ,ip2:&str) -> bool {
-    let status1 = check_status(ip1);
-    let status2 = check_status(ip2);
-    if status1 == false && status2 == false {
-        return false;
-    }else{
-        return true;
-    }
-}
-
-fn loop_20sec(ip1:&str ,ip2:&str) {
-    let secs = 20;
-    let mut time_left = 3;
+fn emergency_loop(ip: &str, args_in: &ArgsIn) {
+    let secs: u64 = match args_in.secs_for_emergency_loop.parse() {
+        Ok(secs) => secs,
+        Err(_) => {
+            println!("Please check your input.");
+            error("turning input to a usable number[in function emergency_loop]");
+        }
+    };
+    let mut time_left: usize = match args_in.times_for_emergency_loop.parse() {
+        Ok(time_left) => time_left,
+        Err(_) => {
+            println!("Please check your input.");
+            error("turning input to a usable number[in function emergency_loop]");
+        }
+    };
     println!("Warning!!! Connection lost!!!!");
-    println!("Checking web connection per 20 seconds!!");
-    loop{
+    println!("Checking web connection per {} seconds!!", secs);
+    loop {
         println!("{} times left for shutting down...", time_left);
-        let status = verify(ip1,ip2);
+        let status = get_status(ip);
         if status == true {
             break;
-        }else if time_left <= 0 {
+        } else if time_left <= 0 {
             shutdown();
+            error("shutting down[permission denied]");
         }
-        println!("{} secs left for the next loop..." ,secs);
-        sleep(Duration::from_secs(20));
+
+        println!("{} secs left for the next loop...", secs);
+        sleep(secs);
         time_left -= 1;
     }
     println!("Reconnected!!!");
-    println!("Exiting 20sec loop...");
-}
-
-fn shutdown() {
-    let _ =run_command(SHUTDOWN_COMMAND, "Started shutting down...");
+    println!("Exiting {}sec loop...", secs);
 }
 
 #[cfg(windows)]
-fn run_command(command: &str, message: &str) -> io::Result<Output> {
-    println!("{}", message);
-    let output = Command::new("cmd")
-        .arg("/C")
-        .arg(command)
-        .output()?;
+fn shutdown() {
+    run_command("shutdown /s /t 0", Some("Started shutting down..."));
+}
+
+#[cfg(unix)]
+fn shutdown() {
+    run_command("shutdown -h now", Some("Started shutting down..."));
+    sleep(7);
+    run_command("poweroff", None);
+    sleep(7);
+    run_command("poweroff -f", None);
+    sleep(7);
+    run_command("halt", None);
+    sleep(7);
+    run_command("init", None);
+    sleep(7);
+    run_command("systemctl poweroff", None);
+}
+
+#[cfg(windows)]
+fn run_command(command: &str, message: Option<&str>) -> io::Result<Output> {
+    match message {
+        Some(message) => println!("{}", message),
+        None => {},
+    }
+    let output = Command::new("cmd").arg("/C").arg(command).output()?;
     Ok(output)
 }
 
 #[cfg(unix)]
-fn run_command(command: &str, message: &str) -> io::Result<Output> {
-    println!("{}", message);
-    let output = Command::new("sh")
-        .arg("-c")
-        .arg(command)
-        .output()?;
+fn run_command(command: &str, message: Option<&str>) -> io::Result<Output> {
+    match message {
+        Some(message) => println!("{}", message),
+        None => {},
+    }
+    let output = Command::new("sh").arg("-c").arg(command).output()?;
     Ok(output)
 }
 
 #[cfg(windows)]
 fn cmd_to_utf8() {
-    let _ = match run_command("chcp 65001", "......") {
-    Ok(output) => output,
-    Err(_) => error(),
+    let _ = match run_command("chcp 65001", None) {
+        Ok(output) => output,
+        Err(_) => error("turning cmd to UTF-8,[in function cmd_to_utf8]"),
     };
 }
 
 fn error(message: &str) -> ! {
-    eprintln!("An error occurred when {},please send an email to h-chris233@qq.com or open a issue to help me improve, tanks!", message);
-    sleep(Duration::from_secs(7));
+    eprintln!("Sorry, an error occurred when {},please send an email to h-chris233@qq.com or open a issue to help me improve, thanks!", message);
+    sleep(7);
     std::process::exit(1);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+fn sleep(time: u64) {
+    thread::sleep(Duration::from_secs(time));
+}
