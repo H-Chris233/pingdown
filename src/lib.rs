@@ -3,15 +3,15 @@ pub use clap::Parser;
 #[command(about, long_about = None)]
 #[command(name = "ping_shutdown")]
 #[command(author = "H-Chris233")]
-#[command(version = "0.0.2")]
+#[command(version = "0.0.4")]
 pub struct ArgsIn{
     ///the ip address or website you want to check
     //#[arg(short, long, default_values_t = vec!["bing.com".to_string(), "apple.com".to_string()])]
     #[arg(short, long, default_value = "bing.com")]
     pub ip: String,
-    ///use -o to active when any connection losts
+    ///use -o to active shutdown when any connection losts
     #[arg(short, long, default_value = "None")]
-    pub or: String,
+    pub and_or: String,
     ///time between two normal check
     #[arg(short = 'n', long, default_value = "60")]
     pub secs_for_normal_loop: String,
