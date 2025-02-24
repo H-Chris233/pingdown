@@ -32,14 +32,18 @@ fn normal_loop(ip: &str, args_in: &ArgsIn) {
     };
     println!("Started {}sec loop...", secs);
     for i in 1.. {
+
         let status = get_status(ip);
+
         if status == false {
             emergency_loop(ip, args_in);
             continue;
         }
+
         println!("Normal looped for {} times...", i);
         println!("{} secs left for the next normal loop...", secs);
         sleep(secs);
+
     }
 }
 
@@ -99,6 +103,7 @@ fn emergency_loop(ip: &str, args_in: &ArgsIn) {
             shutdown();
             error("shutting down[permission denied]");
         }
+
         println!("{} secs left for the next loop...", secs);
         sleep(secs);
         time_left -= 1;
