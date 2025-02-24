@@ -1,6 +1,3 @@
-//#![allow(dead_code)]
-//#![allow(unused)]
-
 use std::process::Command;
 use std::process::Output;
 use std::time::Duration;
@@ -58,16 +55,6 @@ fn get_status(ip: &str) -> bool {
     }
 }
 
-fn check_status(ip: &str, args_in: &ArgsIn) -> bool {
-    let status = get_status(ip);
-    let and_or: bool = match args_in.and_or.as_str() {
-        "" => true,
-        "None" => false,
-        _ => error("reading a bad argument"),
-    };
-    true
-}
-
 fn emergency_loop(ip: &str, args_in: &ArgsIn) {
     let secs: u64 = match args_in.secs_for_emergency_loop.parse() {
         Ok(secs) => secs,
@@ -109,17 +96,17 @@ fn shutdown() {
 
 #[cfg(unix)]
 fn shutdown() {
-    run_command("shutdown -h now", Some("Started shutting down..."));
+    let _ = run_command("shutdown -h now", Some("Started shutting down..."));
     sleep(7);
-    run_command("poweroff", None);
+    let _ = run_command("poweroff", None);
     sleep(7);
-    run_command("poweroff -f", None);
+    let _ = run_command("poweroff -f", None);
     sleep(7);
-    run_command("halt", None);
+    let _ = run_command("halt", None);
     sleep(7);
-    run_command("init", None);
+    let _ = run_command("init", None);
     sleep(7);
-    run_command("systemctl poweroff", None);
+    let _ = run_command("systemctl poweroff", None);
 }
 
 #[cfg(windows)]
