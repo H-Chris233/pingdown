@@ -5,16 +5,12 @@ Available for Windows and Unix-like systems(and MacOS)
 Use **cargo build --release** to build.
 
 
-Usage: main [OPTIONS]
+Usage: ping_shutdown [OPTIONS]
 
 Options:
   -i, --ip <IP>
-  
           the ip address or website you want to check [default: bing.com]
-          
-  -a, --and-or <AND_OR>
-          use -o to active shutdown when any connection losts [default: None]
-          
+
   -n, --secs-for-normal-loop <SECS_FOR_NORMAL_LOOP>
           time between two normal check [default: 60]
           
@@ -22,7 +18,7 @@ Options:
           time between two emegency check [default: 20]
           
   -t, --times-for-emergency-loop <TIMES_FOR_EMERGENCY_LOOP>
-          times for emergency lopp [default: 3]
+          times for emergency loop [default: 3]
           
   -h, --help
           Print help

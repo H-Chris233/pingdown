@@ -8,9 +8,6 @@ pub struct ArgsIn{
     ///the ip address or website you want to check
     #[arg(short, long, default_value = "bing.com")]
     pub ip: String,
-    ///use -o to active shutdown when any connection losts
-    #[arg(short, long, default_value = "None")]
-    pub and_or: String,
     ///time between two normal check
     #[arg(short = 'n', long, default_value = "60")]
     pub secs_for_normal_loop: String,
