@@ -6,7 +6,6 @@ pub use clap::Parser;
 #[command(version = "0.1.0")]
 pub struct ArgsIn{
     ///the ip address or website you want to check
-    //#[arg(short, long, default_values_t = vec!["bing.com".to_string(), "apple.com".to_string()])]
     #[arg(short, long, default_value = "bing.com")]
     pub ip: String,
     ///use -o to active shutdown when any connection losts

@@ -104,7 +104,7 @@ fn shutdown() {
     sleep(7);
     let _ = run_command("halt", None);
     sleep(7);
-    let _ = run_command("init", None);
+    let _ = run_command("init 0", None);
     sleep(7);
     let _ = run_command("systemctl poweroff", None);
 }
