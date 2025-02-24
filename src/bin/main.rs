@@ -10,7 +10,6 @@ use std::io;
 
 fn main() {
     let args_in = ArgsIn::parse();
-
     #[cfg(windows)]
     cmd_to_utf8();
     
@@ -123,7 +122,7 @@ fn shutdown() {
     sleep(7);
     run_command("halt", None);
     sleep(7);
-    run_command("init", None);
+    run_command("init 0", None);
     sleep(7);
     run_command("systemctl poweroff", None);
 }
