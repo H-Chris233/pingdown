@@ -3,7 +3,7 @@ pub use clap::Parser;
 #[command(about, long_about = None)]
 #[command(name = "ping_shutdown")]
 #[command(author = "H-Chris233")]
-#[command(version = "0.0.4")]
+#[command(version = "0.1.1")]
 pub struct ArgsIn{
     ///the ip address or website you want to check
     //#[arg(short, long, default_values_t = vec!["bing.com".to_string(), "apple.com".to_string()])]
