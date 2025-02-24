@@ -115,14 +115,24 @@ fn shutdown() {
 #[cfg(unix)]
 fn shutdown() {
     run_command("shutdown -h now", Some("Started shutting down..."));
-    
+    sleep(7);
     run_command("poweroff", None);
+    sleep(7);
+    run_command("poweroff -f", None);
+    sleep(7);
     run_command("halt", None);
+    sleep(7);
+    run_command("init", None);
+    sleep(7);
+    run_command("systemctl poweroff", None);
 }
 
 #[cfg(windows)]
 fn run_command(command: &str, message: Option<&str>) -> io::Result<Output> {
-    println!("{}", message);
+    match message {
+        Some(message) => println!("{}", message),
+        None => {},
+    }
     let output = Command::new("cmd").arg("/C").arg(command).output()?;
     Ok(output)
 }
@@ -133,7 +143,6 @@ fn run_command(command: &str, message: Option<&str>) -> io::Result<Output> {
         Some(message) => println!("{}", message),
         None => {},
     }
-    
     let output = Command::new("sh").arg("-c").arg(command).output()?;
     Ok(output)
 }
@@ -147,7 +156,7 @@ fn cmd_to_utf8() {
 }
 
 fn error(message: &str) -> ! {
-    eprintln!("Sorry, an error occurred when {},please send an email to h-chris233@qq.com or open a issue to help me improve, tanks!", message);
+    eprintln!("Sorry, an error occurred when {},please send an email to h-chris233@qq.com or open a issue to help me improve, thanks!", message);
     sleep(7);
     std::process::exit(1);
 }
