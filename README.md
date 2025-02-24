@@ -9,6 +9,7 @@ Usage: main [OPTIONS]
 
 Options:
   -i, --ip <IP>
+  
           the ip address or website you want to check [default: bing.com]
           
   -a, --and-or <AND_OR>
