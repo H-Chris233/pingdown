@@ -70,6 +70,7 @@ fn check_status(ip: &str, args_in: &ArgsIn) -> bool {
         _ => error("reading a bad argument"),
     };
     
+    
     true
 }
 
