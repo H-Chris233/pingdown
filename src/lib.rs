@@ -1,4 +1,5 @@
 pub use clap::Parser;
+
 #[derive(Parser, Debug)]
 #[command(about, long_about = None)]
 #[command(name = "ping_shutdown")]
