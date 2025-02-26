@@ -13,15 +13,13 @@ fn main() {
     #[cfg(windows)]
     cmd_to_utf8();
     
-    
-    
+    println!("{:#?}", cli);
     
     println!("Started running...");
-    let ip = &cli.ip.clone();
-    normal_loop(ip, &cli);
+    normal_loop(&cli.vec_ip, &cli);
 }
 
-fn normal_loop(ip: &str, cli: &Cli) {
+fn normal_loop(vec_ip: &Vec<String>, cli: &Cli) {
     let secs: u64 = match cli.secs_for_normal_loop.parse() {
         Ok(secs) => secs,
         Err(_) => {
@@ -31,18 +29,14 @@ fn normal_loop(ip: &str, cli: &Cli) {
     };
     println!("Started {}sec loop...", secs);
     for i in 1.. {
-
-        let status = get_status(ip);
-
+        let status = check_status(vec_ip, cli);
         if status == false {
-            emergency_loop(ip, cli);
+            emergency_loop(vec_ip, cli);
             continue;
         }
-
         println!("Normal looped for {} times...", i);
         println!("{} secs left for the next normal loop...", secs);
         sleep(secs);
-
     }
 }
 
@@ -60,24 +54,35 @@ fn get_status(ip: &str) -> bool {
          println!("fine.");
          true
     } else {
-          println!("Request timed out.");
-          false
+         println!("Request timed out.");
+         false
     }
 }
 
-fn check_status(ip: &str, cli: &Cli) -> bool {
-    let status = get_status(ip);
-    let and_or: bool = match cli.and_or.as_str() {
-        "" => true,
-        "None" => false,
-        _ => error("reading a bad argument"),
+fn check_status(vec_ip: &Vec<String>, cli: &Cli) -> bool {
+    let mut status_vec: Vec<bool> = vec![];
+    for ip in vec_ip {
+        let status = get_status(ip);
+        status_vec.push(status);
+    }
+    let status = match cli.and_or {
+        false => {
+            match status_vec.contains(&true) {
+                true => true,
+                false => false,
+            }
+        },
+        true => {
+            match status_vec.contains(&false) {
+                true => false,
+                false => true,
+            }
+        },
     };
-    
-    
-    true
+    status
 }
 
-fn emergency_loop(ip: &str, cli: &Cli) {
+fn emergency_loop(vec_ip: &Vec<String>, cli: &Cli) {
     let secs: u64 = match cli.secs_for_emergency_loop.parse() {
         Ok(secs) => secs,
         Err(_) => {
@@ -96,7 +101,7 @@ fn emergency_loop(ip: &str, cli: &Cli) {
     println!("Checking web connection per {} seconds!!", secs);
     loop {
         println!("{} times left for shutting down...", time_left);
-        let status = get_status(ip);
+        let status = check_status(vec_ip, cli);
         if status == true {
             break;
         } else if time_left <= 0 {
