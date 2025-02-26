@@ -1,31 +1,31 @@
-When the connect losts, it shuts down.
+## When the connect losts, it shuts down.
 
-Available for Windows and Unix-like systems(and MacOS)
+When running, it will loop and loop, ping the ip or website you set every minutes(by default).  
+
+When the connect losts, it **won't** shutdown immediately, but turn in **emergency-loop** mode. This time, it will ping every 20 seconds(also default), if still nothing for 1 minutes, it shuts down.
+
+Available for Windows and Unix-like systems(and MacOS)[Now trying to supporrt ESXI]
 
 Use **cargo build --release** to build.
 
-
-Usage: ping_shutdown [OPTIONS]
+### You can also set some advanced settings.
+~~~
+Usage: main [OPTIONS]
 
 Options:
   -i, --ip <IP>
           the ip address or website you want to check [default: bing.com]
-
   -n, --secs-for-normal-loop <SECS_FOR_NORMAL_LOOP>
           time between two normal check [default: 60]
-          
   -e, --secs-for-emergency-loop <SECS_FOR_EMERGENCY_LOOP>
           time between two emegency check [default: 20]
-          
   -t, --times-for-emergency-loop <TIMES_FOR_EMERGENCY_LOOP>
-          times for emergency loop [default: 3]
-          
+          times for emergency lopp [default: 3]
   -h, --help
           Print help
-          
   -V, --version
           Print version
-
+~~~
 
 **Please please ignore my poor English(⋟﹏⋞)**
 
