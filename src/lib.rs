@@ -4,14 +4,14 @@ pub use clap::Parser;
 #[command(about, long_about = None)]
 #[command(name = "pingdown")]
 #[command(author = "H-Chris233")]
-#[command(version = "0.2.1")]
+#[command(version = "0.2.3")]
 pub struct Cli{
     ///the ip address or website you want to check
-    #[arg(short, default_value = "bing.com", value_name = "IP WEBSITE ...")]
+    //#[arg(short = 'i', default_value = "bing.com", value_name = "IP WEBSITE ...")]
     pub vec_ip: Vec<String>,
-    ///use -a to active shutdown when any connection losts
-    #[arg(short)]
-    pub and_or: bool,
+    ///Active strict mode. It will shutdown when any connection losts
+    #[arg(short, long)]
+    pub strict: bool,
     ///time between two normal check
     #[arg(short = 'n', default_value = "60")]
     pub secs_for_normal_loop: String,

@@ -13,13 +13,13 @@ Use **cargo build --release** to build.
 Usage: main [OPTIONS]
 
 Options:
-  -v <IP> <WEB SITE> ...                the ip address or website you want to check [default: bing.com]
-  -a                                    use -a to active shutdown when any connection losts
-  -n <SECS_FOR_NORMAL_LOOP>         time between two normal check [default: 60]
-  -e <SECS_FOR_EMERGENCY_LOOP>      time between two emegency check [default: 20]
+  -v <IP WEBSITE ...>                the ip address or website you want to check [default: bing.com]
+  -s, --strict                          active strict mode. It will shutdown when any connection losts
+  -n <SECS_FOR_NORMAL_LOOP>          time between two normal check [default: 60]
+  -e <SECS_FOR_EMERGENCY_LOOP>       time between two emegency check [default: 20]
   -t <TIMES_FOR_EMERGENCY_LOOP>      times for emergency lopp [default: 3]
-  -h, --help                                Print help
-  -V, --version                             Print version
+  -h, --help                         Print help
+  -V, --version                      Print version
 ~~~
 
 **Please please ignore my poor English(⋟﹏⋞)**
