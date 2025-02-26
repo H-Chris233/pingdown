@@ -89,6 +89,7 @@ fn check_status(vec_ip: &Vec<String>, cli: &Cli) -> bool {
     };
     status
 }
+
 ///紧急循环，check_status函数判定为false时进入，判定为true时退出
 fn emergency_loop(vec_ip: &Vec<String>, cli: &Cli) {
     let secs: u64 = match cli.secs_for_emergency_loop.parse() {

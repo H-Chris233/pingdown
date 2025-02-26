@@ -1,7 +1,9 @@
 [package]
 name = "pingdown"
 version = "0.2.4"
+authors = ["Chris233 h-chris233@qq.com"]
 edition = "2021"
+readme = "README.md"
 
 [dependencies]
 clap = { version = "4.5.30", features = ["derive"] }
