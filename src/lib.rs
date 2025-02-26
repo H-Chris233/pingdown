@@ -5,7 +5,7 @@ pub use clap::Parser;
 #[command(name = "ping_shutdown")]
 #[command(author = "H-Chris233")]
 #[command(version = "0.1.1")]
-pub struct ArgsIn{
+pub struct Cli{
     ///the ip address or website you want to check
     //#[arg(short, long, default_values_t = vec!["bing.com".to_string(), "apple.com".to_string()])]
     #[arg(short, long, default_value = "bing.com")]

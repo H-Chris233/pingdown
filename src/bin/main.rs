@@ -9,7 +9,7 @@ use std::thread;
 use std::io;
 
 fn main() {
-    let args_in = ArgsIn::parse();
+    let cli = Cli::parse();
     #[cfg(windows)]
     cmd_to_utf8();
     
@@ -17,12 +17,12 @@ fn main() {
     
     
     println!("Started running...");
-    let ip = &args_in.ip.clone();
-    normal_loop(ip, &args_in);
+    let ip = &cli.ip.clone();
+    normal_loop(ip, &cli);
 }
 
-fn normal_loop(ip: &str, args_in: &ArgsIn) {
-    let secs: u64 = match args_in.secs_for_normal_loop.parse() {
+fn normal_loop(ip: &str, cli: &Cli) {
+    let secs: u64 = match cli.secs_for_normal_loop.parse() {
         Ok(secs) => secs,
         Err(_) => {
             println!("Please check your input.");
@@ -35,7 +35,7 @@ fn normal_loop(ip: &str, args_in: &ArgsIn) {
         let status = get_status(ip);
 
         if status == false {
-            emergency_loop(ip, args_in);
+            emergency_loop(ip, cli);
             continue;
         }
 
@@ -65,9 +65,9 @@ fn get_status(ip: &str) -> bool {
     }
 }
 
-fn check_status(ip: &str, args_in: &ArgsIn) -> bool {
+fn check_status(ip: &str, cli: &Cli) -> bool {
     let status = get_status(ip);
-    let and_or: bool = match args_in.and_or.as_str() {
+    let and_or: bool = match cli.and_or.as_str() {
         "" => true,
         "None" => false,
         _ => error("reading a bad argument"),
@@ -77,15 +77,15 @@ fn check_status(ip: &str, args_in: &ArgsIn) -> bool {
     true
 }
 
-fn emergency_loop(ip: &str, args_in: &ArgsIn) {
-    let secs: u64 = match args_in.secs_for_emergency_loop.parse() {
+fn emergency_loop(ip: &str, cli: &Cli) {
+    let secs: u64 = match cli.secs_for_emergency_loop.parse() {
         Ok(secs) => secs,
         Err(_) => {
             println!("Please check your input.");
             error("turning input to a usable number[in function emergency_loop]");
         }
     };
-    let mut time_left: usize = match args_in.times_for_emergency_loop.parse() {
+    let mut time_left: usize = match cli.times_for_emergency_loop.parse() {
         Ok(time_left) => time_left,
         Err(_) => {
             println!("Please check your input.");

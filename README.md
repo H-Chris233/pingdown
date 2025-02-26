@@ -1,4 +1,4 @@
-### When the connect losts, it shuts down.
+## When the connect losts, it shuts down.
 
 When running, it will loop and loop, ping the ip or website you set every minutes(by default).  
 
