@@ -14,6 +14,11 @@ fn main() {
     #[cfg(windows)]
     cmd_to_utf8();
     
+    if cli.vec_ip.len() == 0  {
+        println!("Please input at least one ip or website.\nYou can also use -h or --help to get help.");
+        sleep(7);
+        std::process::exit(0);
+    }
     println!("{:#?}", cli);
     
     println!("Started running...");
