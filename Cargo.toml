@@ -1,5 +1,5 @@
 [package]
-name = "ping_shutdown"
+name = "pingdown"
 version = "0.2.1"
 edition = "2021"
 

@@ -4,7 +4,7 @@
 use std::process::Command;
 use std::process::Output;
 use std::time::Duration;
-use ping_shutdown::*;
+use pingdown::*;
 use std::thread;
 use std::io;
 

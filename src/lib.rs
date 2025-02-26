@@ -2,7 +2,7 @@ pub use clap::Parser;
 
 #[derive(Parser, Debug)]
 #[command(about, long_about = None)]
-#[command(name = "ping_shutdown")]
+#[command(name = "pingdown")]
 #[command(author = "H-Chris233")]
 #[command(version = "0.2.1")]
 pub struct Cli{
