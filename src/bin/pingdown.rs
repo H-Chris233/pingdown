@@ -1,6 +1,3 @@
-//#![allow(dead_code)]
-//#![allow(unused)]
-
 use std::process::Command;
 use std::process::Output;
 use std::time::Duration;
