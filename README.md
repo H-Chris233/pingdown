@@ -1,6 +1,6 @@
 # pingdown - Network Connectivity Monitor 
 
-**[简体中文](./README_zh.md)**
+## **[简体中文](./README_zh.md)**
 
 A Rust-based utility that initiates system shutdown when critical network connections fail.
 
