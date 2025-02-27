@@ -1,32 +1,60 @@
-## When the connect losts, it shuts down.
+# pingdown - Network Connectivity Monitor 
 
-When running, it will loop and loop, ping the ip or website you set every minutes(by default).  
+## **[简体中文](./README_zh.md)**
 
-When the connect losts, it **won't** shutdown immediately, but turn in **emergency-loop** mode. This time, it will ping every 20 seconds(also default), if still nothing for 1 minutes, it shuts down.
+A Rust-based utility that initiates system shutdown when critical network connections fail.
 
-Available for Windows and Unix-like systems(and MacOS)[Now trying to supporrt ESXI]
+## Key Features
 
-Use **cargo build --release** to build.
+🛡️ **Fail-Safe Mechanism**  
+Continuously monitors specified network targets and triggers emergency actions(shutdown) when connectivity is lost.
 
-### You can also set some advanced settings.
-~~~
-Usage: main [OPTIONS]
+## Operational Modes
 
-Options:
-  -i, --ip <IP>
-          the ip address or website you want to check [default: bing.com]
-  -n, --secs-for-normal-loop <SECS_FOR_NORMAL_LOOP>
-          time between two normal check [default: 60]
-  -e, --secs-for-emergency-loop <SECS_FOR_EMERGENCY_LOOP>
-          time between two emegency check [default: 20]
-  -t, --times-for-emergency-loop <TIMES_FOR_EMERGENCY_LOOP>
-          times for emergency lopp [default: 3]
-  -h, --help
-          Print help
-  -V, --version
-          Print version
-~~~
+### Normal Monitoring Mode
+- **Default check interval**: 60 seconds
+- Verifies connectivity to all specified targets
 
-**Please please ignore my poor English(⋟﹏⋞)**
+### Emergency Mode Activation
+- Automatically enters emergency mode upon first connection failure
+- **Emergency check interval**: 20 seconds
+- **Failure threshold**: 3 consecutive failures (60 seconds total)
+- Initiates system shutdown when threshold is reached
 
-Have a nice day. ヾ(✿ﾟ▽ﾟ)ノ
+## Platform Support
+✅ **Stable Support**:
+- Windows XP/7/8/8.1/10/11
+- macOS 10.15+
+- Linux (kernel 5.4+)
+
+🔧 **Will Support**:
+- VMware ESXi (v7.0+)
+
+## Installation & Building
+```bash
+cargo build --release
+```
+## Configuration Options
+
+### Basic Usage
+```bash
+pingdown [TARGETS...]
+```
+### Advanced Configuration
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-s`, `--strict` | Require **all** targets to be reachable | `false` |
+| `-n` | Regular check interval (seconds) | `60` |
+| `-e` | Emergency check interval (seconds) | `20` |
+| `-t` | Emergency retry attempts | `3` |
+| `-V`, `--version` | Show version information | - |
+| `-h`, `--help` | Display full help documentation | - |
+
+## Usage Example
+
+```bash
+pingdown -n 45 -e 15 -t 4 192.168.1.1 example.com
+```
+
+## Have a nice day. ヾ(✿ﾟ▽ﾟ)ノ
