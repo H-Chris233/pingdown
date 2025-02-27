@@ -8,7 +8,7 @@ use pingdown::*;
 use std::thread;
 use std::io;
 
-/// Handles argument processing and output configuration. Adjusts terminal encoding on Windows. Acts as the program entry point.
+/// Handles argument processing. Adjusts terminal encoding on Windows. Acts as the program entry point.
 fn main() {
     let cli = Cli::parse();
     #[cfg(windows)]
@@ -16,12 +16,10 @@ fn main() {
     
     if cli.vec_ip.is_empty()  {
         println!("Please input at least one ip or website.\nYou can also use -h or --help to get help.");
-        sleep(7);
+        sleep(4);
         std::process::exit(0);
     }
-    println!("{:#?}", cli);
-    
-    println!("Started running...");
+    output_message(&cli);
     normal_loop(&cli.vec_ip, &cli);
 }
 
@@ -190,4 +188,10 @@ fn error(message: &str) -> ! {
 /// Suspends execution for specified duration
 fn sleep(time: u64) {
     thread::sleep(Duration::from_secs(time));
+}
+
+/// Output configuration.
+fn output_message(cli: &Cli) {
+    println!("{:#?}", cli);
+    println!("Started running...");
 }
