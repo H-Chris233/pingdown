@@ -14,7 +14,7 @@ fn main() {
     #[cfg(windows)]
     cmd_to_utf8();
     
-    if cli.vec_ip.len() == 0  {
+    if cli.vec_ip.is_empty()  {
         println!("Please input at least one ip or website.\nYou can also use -h or --help to get help.");
         sleep(7);
         std::process::exit(0);
@@ -109,7 +109,7 @@ fn emergency_loop(vec_ip: &Vec<String>, cli: &Cli) {
     println!("Warning!!! Connection lost!!!!");
     println!("Checking web connection per {} seconds!!", secs);
     loop {
-        println!("{} times left for shutting down...", time_left);
+        println!("{} tries remaining...", time_left);
         let status = check_status(vec_ip, cli);
         if status == true {
             break;
