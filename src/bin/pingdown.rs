@@ -1,8 +1,12 @@
 #![allow(dead_code)]
 #![allow(unused)]
 
+mod libs;
+
 use pingdown::*;
 use regex::Regex;
+use crate::libs::loops::normal_loop;
+use crate::libs::io::*;
 
 /// Handles argument processing. Adjusts terminal encoding on Windows. Acts as the program entry point.
 fn main() {
@@ -13,6 +17,12 @@ fn main() {
     check_cli(&cli);
     output_message(&cli);
     normal_loop(&cli.vec_ip, &cli);
+}
+
+/// Output configuration.
+fn output_message(cli: &Cli) {
+    println!("{:#?}", cli);
+    println!("Started running...");
 }
 
 ///Use regex to verify if the address is correct or not.
