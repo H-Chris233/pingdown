@@ -27,7 +27,7 @@ Continuously monitors specified network targets and triggers emergency actions(s
 - macOS 10.15+
 - Linux (kernel 5.4+)
 
-🔧 **Experimental Support**:
+🔧 **Will Support**:
 - VMware ESXi (v7.0+)
 
 ## Installation & Building
