@@ -4,7 +4,7 @@ pub use clap::Parser;
 #[command(about, long_about = None)]
 #[command(name = "pingdown")]
 #[command(author = "H-Chris233")]
-#[command(version = "0.2.4")]
+#[command(version = "1.0.2")]
 pub struct Cli{
     ///the ip address or website you want to check
     pub vec_ip: Vec<String>,
