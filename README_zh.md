@@ -29,9 +29,10 @@
 - VMware ESXi (v7.0+)
 
 ## 安装与构建
+
 ```bash
 cargo build --release
- ```
+```
 
 ## 配置选项
 
@@ -56,14 +57,3 @@ pingdown -n 45 -e 15 -t 4 192.168.1.1 example.com
 ```
 
 ## 祝您使用愉快!ヾ(✿ﾟ▽ﾟ)ノ
-
-
-
-
-
-
-
-
-
-
-
