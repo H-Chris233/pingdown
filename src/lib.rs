@@ -7,9 +7,10 @@ pub use clap::Parser;
 #[command(version = "0.2.4")]
 pub struct Cli{
     ///the ip address or website you want to check
-    //#[arg(short = 'i', default_value = "bing.com", value_name = "IP WEBSITE ...")]
     pub vec_ip: Vec<String>,
-    ///Active strict mode. It will shutdown when any connection losts
+    ///Active strict mode.
+    /// Strict mode requires all targets to be reachable
+    /// Default mode accepts any successful connection
     #[arg(short, long)]
     pub strict: bool,
     ///time between two normal check

@@ -8,7 +8,7 @@ use pingdown::*;
 use std::thread;
 use std::io;
 
-///负责接收并输出参数，在Windows下调整终端输出以及作为循环的入口点(初始化)
+/// Handles argument processing and output configuration. Adjusts terminal encoding on Windows. Acts as the program entry point.
 fn main() {
     let cli = Cli::parse();
     #[cfg(windows)]
@@ -25,21 +25,21 @@ fn main() {
     normal_loop(&cli.vec_ip, &cli);
 }
 
-///普通循环，一般情况下永不返回
+/// Continuously monitors connectivity in regular intervals
 fn normal_loop(vec_ip: &Vec<String>, cli: &Cli) {
     let secs: u64 = match cli.secs_for_normal_loop.parse() {
-        Ok(secs) => secs,//判断用户输入是否有误
+        Ok(secs) => secs, // Parses user-defined interval duration
         Err(_) => {
             println!("Please check your input.");
-            error("turning input to a number[in function normal_loop]")
+            error("parsing interval duration [normal_loop context]")
         }
-    };//普通循环初始化到此为止
+    };
     println!("Started {}sec loop...", secs);
-    for i in 1.. {//无限循环，同时计数
-        let status = check_status(vec_ip, cli);//传入向量，进入数据处理阶段
-        if status == false {//判断链接状态
-            emergency_loop(vec_ip, cli);//紧急循环
-            continue;//若重新连接则跳过本次等待
+    for i in 1.. {
+        let status = check_status(vec_ip, cli);
+        if status == false {
+            emergency_loop(vec_ip, cli);
+            continue;
         }
         println!("Normal looped for {} times...", i);
         println!("{} secs left for the next normal loop...", secs);
@@ -47,26 +47,26 @@ fn normal_loop(vec_ip: &Vec<String>, cli: &Cli) {
     }
 }
 
-///利用操作系统中的ping指令来判断单个地址的连接
+/// Tests connectivity to a single target using system ping command
 fn get_status(ip: &str) -> bool {
     let command = format!("ping -c 1 {}", ip);
-    let message = format!("Started clienting {}...", ip);
+    let message = format!("Started pinging {}...", ip);
     let output = match run_command(&command, Some(&message)) {
-        Ok(output) => output,//获取输出
-        Err(_) => error("running command[in function get_status]"),
+        Ok(output) => output, // Gets command output
+        Err(_) => error("executing command[in get_status]"),
     };
-    let status = String::from_utf8_lossy(&output.stdout).to_string();//从UTF-8转为普通字符串，lossy方法将不可用的字符统一处理为？
+    let status = String::from_utf8_lossy(&output.stdout).to_string(); // Converts byte stream to UTF-8 string with invalid character handling
     println!("Started checking {}...", ip);
-    if status.contains("TTL") || status.contains("ttl") {//通过检测命令输出中是否有TTL字样判断是否连接成功
-         println!("fine.");
+    if status.contains("TTL") || status.contains("ttl") { // Checks for TTL presence to determine success
+         println!("Success.");
          true
     } else {
          println!("Request timed out.");
-         false//整个程序中false表异常
+         false // indicates connection failure state
     }
 }
 
-///将以向量存储的地址们解包处理，同时将多个返回结果统计为一个bool值
+/// Evaluates connectivity status across multiple targets according to monitoring mode
 fn check_status(vec_ip: &Vec<String>, cli: &Cli) -> bool {
     let mut status_vec: Vec<bool> = vec![];
     for ip in vec_ip {
@@ -75,13 +75,13 @@ fn check_status(vec_ip: &Vec<String>, cli: &Cli) -> bool {
     }
     let status = match cli.strict {
         false => {
-            match status_vec.contains(&true) {//默认模式中，若任何地址通，则视为通过
+            match status_vec.contains(&true) { // Default mode: any successful connection passes
                 true => true,
                 false => false,
             }
         },
         true => {
-            match status_vec.contains(&false) {//严格模式中，若任意地址不通，则视为不通
+            match status_vec.contains(&false) { // Strict mode: requires all connections to succeed
                 true => false,
                 false => true,
             }
@@ -90,24 +90,24 @@ fn check_status(vec_ip: &Vec<String>, cli: &Cli) -> bool {
     status
 }
 
-///紧急循环，check_status函数判定为false时进入，判定为true时退出
+/// Critical failure handler activated when connectivity is lost. Implements retry mechanism and system shutdown protocol.
 fn emergency_loop(vec_ip: &Vec<String>, cli: &Cli) {
     let secs: u64 = match cli.secs_for_emergency_loop.parse() {
-        Ok(secs) => secs,//判断参数是否正确
+        Ok(secs) => secs, // Parses emergency retry interval duration
         Err(_) => {
             println!("Please check your input.");
-            error("turning input to a usable number[in function emergency_loop]");
+            error("parsing emergency interval [emergency_loop]");
         }
     };
     let mut time_left: usize = match cli.times_for_emergency_loop.parse() {
         Ok(time_left) => time_left,
         Err(_) => {
             println!("Please check your input.");
-            error("turning input to a usable number[in function emergency_loop]");
+            error("converting input to number[in emergency_loop]");
         }
     };
     println!("Warning!!! Connection lost!!!!");
-    println!("Checking web connection per {} seconds!!", secs);
+    println!("Checking connection every {} seconds!!", secs);
     loop {
         println!("{} tries remaining...", time_left);
         let status = check_status(vec_ip, cli);
@@ -115,10 +115,10 @@ fn emergency_loop(vec_ip: &Vec<String>, cli: &Cli) {
             break;
         } else if time_left <= 0 {
             shutdown();
-            error("shutting down[permission denied]");//经过shutdown函数的指令轰炸(Unix)后，还没有关机的只能是没权限了
+            error("system shutdown failed - check permissions"); // System still running indicates permission issues
         }
 
-        println!("{} secs left for the next loop...", secs);
+        println!("{} secs left for the next check...", secs);
         sleep(secs);
         time_left -= 1;
     }
@@ -126,17 +126,17 @@ fn emergency_loop(vec_ip: &Vec<String>, cli: &Cli) {
     println!("Exiting {}sec emergency loop...", secs);
 }
 
-///适用于Windows的关机指令
+/// Windows shutdown command implementation
 #[cfg(windows)]
 fn shutdown() {
-    run_command("shutdown /s /t 0", Some("Started shutting down..."));
+    run_command("shutdown /s /t 0", Some("Starting shutdown..."));
 }
 
-///适用于Unix的关机指令
+/// Unix shutdown command implementation with fallback methods
 #[cfg(unix)]
 fn shutdown() {
-    let _ = run_command("shutdown -h now", Some("Started shutting down..."));
-    sleep(7);//等待关机，如过了7秒还没有关机的视为系统不支持该指令
+    let _ = run_command("shutdown -h now", Some("Starting shutdown..."));
+    sleep(7); // Tries multiple shutdown commands with 7-second delays
     let _ = run_command("poweroff", None);
     sleep(7);
     let _ = run_command("poweroff -f", None);
@@ -148,7 +148,7 @@ fn shutdown() {
     let _ = run_command("systemctl poweroff", None);
 }
 
-///适用于Windows的命令行调用(cmd)
+/// Windows command line execution (cmd)
 #[cfg(windows)]
 fn run_command(command: &str, message: Option<&str>) -> io::Result<Output> {
     match message {
@@ -159,7 +159,7 @@ fn run_command(command: &str, message: Option<&str>) -> io::Result<Output> {
     Ok(output)
 }
 
-///适用于unix的命令行调用(sh)
+/// Unix command line execution (sh)
 #[cfg(unix)]
 fn run_command(command: &str, message: Option<&str>) -> io::Result<Output> {
     match message {
@@ -170,24 +170,24 @@ fn run_command(command: &str, message: Option<&str>) -> io::Result<Output> {
     Ok(output)
 }
 
-///在Windows中需要将终端输出格式设置为UTF-8以读取
+/// Configures Windows console for UTF-8 text encoding
 #[cfg(windows)]
 fn cmd_to_utf8() {
-    ///65001是Windows中代表UTF-8输出的魔数
+    // 65001 is the Windows code page identifier for UTF-8 encoding
     let _ = match run_command("chcp 65001", None) {
         Ok(output) => output,
-        Err(_) => error("turning cmd to UTF-8,[in function cmd_to_utf8]"),
+        Err(_) => error("configuring console encoding [cmd_to_utf8]"),
     };
 }
 
-///错误处理函数
+/// Terminates program after critical errors with diagnostic information
 fn error(message: &str) -> ! {
-    eprintln!("Sorry, an error occurred when {},please send an email to h-chris233@qq.com or open a issue to help me improve, thanks!", message);
+    eprintln!("Error occurred during {}, please contact h-chris233@qq.com or open an issue.", message);
     sleep(7);
     std::process::exit(1);
 }
 
-///暂停运行函数
+/// Suspends execution for specified duration
 fn sleep(time: u64) {
     thread::sleep(Duration::from_secs(time));
 }
