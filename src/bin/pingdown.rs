@@ -1,6 +1,3 @@
-#![allow(dead_code)]
-#![allow(unused)]
-
 mod libs;
 
 use crate::libs::regex::{check_cli, cli_to_info};
@@ -16,7 +13,6 @@ fn main() {
     let cli = Cli::parse();
     let info = match &cli.read_json {
         true => {
-            output_message(&read_json());
             read_json()
         }
         false => {
