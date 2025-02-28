@@ -10,3 +10,10 @@ default-run = "pingdown"
 [dependencies]
 clap = { version = "4.5.30", features = ["derive"] }
 regex = "1.11.1"
+
+[profile.release]
+opt-level = "z"
+lto = true
+strip = true
+codegen-units = 1
+panic = "abort"
