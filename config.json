@@ -1,0 +1,10 @@
+{
+  "address": ["127.0.0.1", 
+            "192.168.1.1:8443",
+            "bing.com"
+  ],
+  "strict": false,
+  "secs-for-normal-loop": 6,
+  "secs-for-emergency-loop": 5,
+  "times-for-emergency-loop": 3
+}
