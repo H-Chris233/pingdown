@@ -20,9 +20,9 @@ fn get_status(ip: &str) -> bool {
 }
 
 /// Evaluates connectivity status across multiple targets according to monitoring mode
-pub fn check_status(vec_ip: &Vec<String>, strict: &bool) -> bool {
+pub fn check_status(vec_address: &Vec<String>, strict: &bool) -> bool {
     let mut status_vec: Vec<bool> = vec![];
-    for ip in vec_ip {
+    for ip in vec_address {
         let status = get_status(ip);
         status_vec.push(status);
     }

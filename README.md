@@ -1,60 +1,78 @@
-# pingdown - Network Connectivity Monitor 
+# pingdown - Network Connectivity Monitoring Daemon
 
 ## **[简体中文](./README_zh.md)**
 
-A Rust-based utility that initiates system shutdown when critical network connections fail.
+A Rust-based intelligent network monitoring tool that triggers system shutdown when critical connections are lost.
 
-## Key Features
+```bash
+# Build from source
+cargo build --release
+```
 
-🛡️ **Fail-Safe Mechanism**  
-Continuously monitors specified network targets and triggers emergency actions(shutdown) when connectivity is lost.
-
-## Operational Modes
-
-### Normal Monitoring Mode
-- **Default check interval**: 60 seconds
-- Verifies connectivity to all specified targets
-
-### Emergency Mode Activation
-- Automatically enters emergency mode upon first connection failure
-- **Emergency check interval**: 20 seconds
-- **Failure threshold**: 3 consecutive failures (60 seconds total)
-- Initiates system shutdown when threshold is reached
+---
 
 ## Platform Support
 ✅ **Stable Support**:
-- Windows XP/7/8/8.1/10/11
+- Windows XP/7/8/8.1/10/11/Windows Server
 - macOS 10.15+
-- Linux (kernel 5.4+)
+- Linux (Kernel 5.4+)
 
-🔧 **Will Support**:
+🔧 **Coming Soon**:
 - VMware ESXi (v7.0+)
 
-## Installation & Building
+---
+
+## ⚙️ Configuration System
+
+### 1. Priority Rules
 ```bash
-cargo build --release
-```
-## Configuration Options
+# When using -r (config file priority)
+config.json > CLI arguments > Default values
 
-### Basic Usage
-```bash
-pingdown [TARGETS...]
-```
-### Advanced Configuration
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| `-s`, `--strict` | Require **all** targets to be reachable | `false` |
-| `-n` | Regular check interval (seconds) | `60` |
-| `-e` | Emergency check interval (seconds) | `20` |
-| `-t` | Emergency retry attempts | `3` |
-| `-V`, `--version` | Show version information | - |
-| `-h`, `--help` | Display full help documentation | - |
-
-## Usage Example
-
-```bash
-pingdown -n 45 -e 15 -t 4 192.168.1.1 example.com
+# Without -r (CLI-only mode)
+CLI arguments > Default values
 ```
 
-## Have a nice day. ヾ(✿ﾟ▽ﾟ)ノ
+### 2. Configuration File Specification
+```json
+{
+  "address": [
+    "127.0.0.1",
+    "192.168.1.1:8443",
+    "bing.com"
+  ],
+  "strict": false,
+  "secs-for-normal-loop": 60,
+  "secs-for-emergency-loop": 20,
+  "times-for-emergency-loop": 3
+}
+```
+
+### 3. Parameter Interaction
+```bash
+# Scenario 1: CLI-only mode
+pingdown -n 30 8.8.8.8
+
+# Scenario 2: Config file mode
+pingdown -r
+```
+
+---
+
+## 📦 Command Reference
+
+| Flag | Function                     | Default Value |
+|------|------------------------------|---------------|
+| `-r` | Enable config file           | Disabled      |
+| `-s` | Strict check mode            | false         |
+| `-n` | Normal check interval (sec)  | 60            |
+| `-e` | Emergency check interval (sec)| 20           |
+| `-t` | Emergency failure threshold  | 3             |
+
+---
+
+> 📌 **Best Practice**: Use `-r` for production environments, CLI mode for development
+
+## **If shutdown fails, run with administrator privileges!**
+
+### Have a nice day! ヾ(✿ﾟ▽ﾟ)ノ
