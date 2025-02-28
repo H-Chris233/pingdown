@@ -12,7 +12,6 @@ pub fn check_cli(cli: &Cli) {
     if cli.vec_address.is_empty() {
         println!("Please provide at least one IP address or website.\nFor usage instructions, use -h or --help.");
         error("there's no address to detect");
-        std::process::exit(0);
     }
     for ip in &cli.vec_address {
         match re_address.is_match(ip) {

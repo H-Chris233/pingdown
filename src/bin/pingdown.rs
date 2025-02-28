@@ -8,7 +8,6 @@ use crate::libs::loops::normal_loop;
 use pingdown::{Cli, Info};
 pub use clap::Parser;
 use crate::libs::io::*;
-use std::io;
 use std::fs;
 
 /// Handles command-line argument processing and terminal encoding configuration.
