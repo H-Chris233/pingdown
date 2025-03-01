@@ -3,11 +3,11 @@
 
 mod libs;
 
-use crate::libs::regex::{check_cli};
+use crate::libs::check_input::{check_cli};
 use crate::libs::loops::normal_loop;
-use crate::libs::info::*;
+use crate::libs::struct_info::*;
 use crate::libs::io::*;
-use pingdown::{Cli, Info};
+use pingdown::{Cli};
 use clap::Parser;
 
 /// Handles command-line argument processing and terminal encoding configuration.
@@ -23,20 +23,13 @@ fn main() {
             cli_to_info(cli)
         }
     };
-    output_info(&info);
+    info.output_info();
     #[cfg(windows)]
     cmd_to_utf8();
     
     normal_loop(&info.vec_address, &info);
 }
 
-
-
-/// Displays configuration details and initialization status
-fn output_struct_info<S: StructInfo>(info: &S) {
-    println!("{:#?}", info);
-    println!("Initializing monitoring process...");
-}
 
 
 

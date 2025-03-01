@@ -1,7 +1,7 @@
 use regex::Regex;
 use crate::libs::io::error;
-use pingdown::{Info, Cli};
-use crate::libs::info::convert_num;
+use pingdown::{Cli};
+use crate::libs::struct_info::convert_num;
 
 /// Validates command-line inputs using regular expressions
 /// Ensures proper IP/URL formatting and numeric parameter validity

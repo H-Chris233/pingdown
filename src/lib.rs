@@ -44,22 +44,9 @@ pub struct Info {
     #[serde(alias = "times-for-emergency-loop", default = "default_3")]
     pub times_for_emergency_loop: u64,
 }
-
-fn default_60() -> u64 {
-    60
-}
-fn default_20() -> u64 {
-    20
-}
-fn default_3() -> u64 {
-    3
-}
-
-trait 
-
-
-
-
+fn default_60() -> u64 {60}
+fn default_20() -> u64 {20}
+fn default_3() -> u64 {3}
 
 
 

@@ -1,6 +1,7 @@
 use pingdown::{Info, Cli};
 use std::fs;
 use crate::libs::io::error;
+use std::fmt::Debug;
 
 pub fn read_json() -> Info {
     let json_str = match fs::read_to_string("./config.json") {
@@ -12,12 +13,6 @@ pub fn read_json() -> Info {
         Err(err) => error(&format!("parsing JSON file.\n{}", err)),
     };
     config
-}
-
-/// Displays configuration details and initialization status
-pub fn output_info(info: &Info) {
-    println!("{:#?}", info);
-    println!("Initializing monitoring process...");
 }
 
 /// Verifies numeric parameters are valid positive integers
@@ -44,7 +39,15 @@ pub fn cli_to_info(cli: Cli) -> Info {
     output
 }
 
-
+/// Displays configuration details and initialization status
+pub trait StructInfo: Debug {
+    fn output_info(&self) {
+        println!("{:#?}", self);
+        println!("Initializing monitoring process...");
+    }
+}
+impl StructInfo for Cli{}
+impl StructInfo for Info{}
 
 
 
