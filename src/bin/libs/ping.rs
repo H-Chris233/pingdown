@@ -2,7 +2,12 @@ use crate::libs::io::{run_command, error};
 
 /// Tests connectivity to a single target using system ping command
 fn get_status(ip: &str) -> bool {
+    #[cfg(unix)]
     let command = format!("ping -c 1 {}", ip);
+
+    #[cfg(windows)]
+    let command = format!("ping -n 1 {}", ip);
+
     let message = format!("Started pinging {}...", ip);
     let output = match run_command(&command, Some(&message)) {
         Ok(output) => output, // Gets command output
