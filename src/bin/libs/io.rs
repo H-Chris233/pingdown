@@ -45,7 +45,7 @@ pub fn shutdown() {
 /// Windows shutdown command implementation
 #[cfg(windows)]
 pub fn shutdown() {
-    run_command("shutdown /s /t 0", Some("Starting shutdown..."));
+    let _ = run_command("shutdown /s /t 0", Some("Starting shutdown..."));
 }
 
 /// Configures Windows console for UTF-8 text encoding
