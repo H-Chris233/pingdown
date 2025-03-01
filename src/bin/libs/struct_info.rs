@@ -1,8 +1,17 @@
+//! Configuration processing module: Handles config file reading, parameter conversion, struct transformations
 use pingdown::{Info, Cli};
 use std::fs;
 use crate::libs::io::error;
 use std::fmt::Debug;
 
+/// Loads configuration from JSON file
+/// 
+/// # Path
+/// - Hardcoded path: "./config.json"
+/// 
+/// # Error Handling
+/// - File read failure: Terminates process via error()
+/// - JSON parse failure: Terminates process via error()
 pub fn read_json() -> Info {
     let json_str = match fs::read_to_string("./config.json") {
         Ok(json_str) => json_str,
@@ -15,7 +24,15 @@ pub fn read_json() -> Info {
     config
 }
 
-/// Verifies numeric parameters are valid positive integers
+/// Numeric parameter validator/converter
+/// 
+/// # Functionality
+/// 1. Converts string to u64 integer
+/// 2. Validates non-zero positive integer
+/// 
+/// # Error Handling
+/// - Parse failure: Triggers error() with invalid input
+/// - Zero value: Triggers error() requiring positive integer
 pub fn convert_num(num: &str) -> u64 {
     let num: u64 = match num.parse() {
         Ok(num) => num,
@@ -27,7 +44,12 @@ pub fn convert_num(num: &str) -> u64 {
     num
 }
 
-/// Turn a Cli struct to a Info struct.
+/// CLI arguments to config struct converter
+/// 
+/// # Conversion Logic
+/// - Numeric fields: Safely converted via convert_num
+/// - Address list: Direct mapping
+/// - Strict mode: Direct mapping
 pub fn cli_to_info(cli: Cli) -> Info {
     let output = Info {
         secs_for_normal_loop: convert_num(&cli.secs_for_normal_loop),
@@ -39,17 +61,21 @@ pub fn cli_to_info(cli: Cli) -> Info {
     output
 }
 
-/// Displays configuration details and initialization status
+/// Configuration debugging interface
+/// 
+/// # Default Implementation
+/// - Prints pretty-printed Debug output
+/// - Displays initialization status
 pub trait StructInfo: Debug {
+    /// Outputs structured debug info and initialization status
     fn output_info(&self) {
         println!("{:#?}", self);
         println!("Initializing monitoring process...");
     }
 }
+
+// Implements debug interface for CLI and config structs
 impl StructInfo for Cli{}
 impl StructInfo for Info{}
-
-
-
 
 
