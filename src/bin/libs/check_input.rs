@@ -6,7 +6,7 @@ use crate::libs::struct_info::convert_num;
 /// Validates command-line inputs using regular expressions
 /// Ensures proper IP/URL formatting and numeric parameter validity
 pub fn check_cli(cli: &Cli) {
-    let re_address = match Regex::new(r"^(?:(?:https?|ftp|file|ftps)://)?(?:[^\s:@/]+(?::[^\s:@/]*)?@)?(?:(?:www\.)?(?:[a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.[a-zA-Z]{2,}|(?:\d{1,3}\.){3}\d{1,3}|\[[a-fA-F0-9:]+\])(?::\d+)?(?:/[^\s?#]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?$") {
+    let re_address = match Regex::new(r"^(?:(?:https?|ftp|ftps)://)?(?:[^\s:@/]+(?::[^\s:@/]*)?@)?(?:(?:www\.)?(?:[a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.[a-zA-Z]{2,}|(?:\d{1,3}\.){3}\d{1,3}|\[[a-fA-F0-9:]+\])(?::\d+)?(?:/[^\s?#]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?$") {
         Ok(re_ip) => re_ip,
         Err(err) => error(&format!("Regex compilation failed. {}[in function check_cli]", err)),
     };
