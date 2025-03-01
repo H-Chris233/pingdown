@@ -16,6 +16,6 @@ serde_json = "1.0.139"
 [profile.release]
 opt-level = "z"
 lto = "fat"
-strip = "all"
+strip = true
 codegen-units = 1
 panic = "abort"
