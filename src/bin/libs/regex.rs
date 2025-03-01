@@ -1,6 +1,7 @@
 use regex::Regex;
 use crate::libs::io::error;
 use pingdown::{Info, Cli};
+use crate::libs::info::convert_num;
 
 /// Validates command-line inputs using regular expressions
 /// Ensures proper IP/URL formatting and numeric parameter validity
@@ -24,30 +25,6 @@ pub fn check_cli(cli: &Cli) {
     check_num(&cli.times_for_emergency_loop);
 }
 
-/// Verifies numeric parameters are valid positive integers
-fn convert_num(num: &str) -> u64 {
-    let num: u64 = match num.parse() {
-        Ok(num) => num,
-        Err(_) => error(&format!("Invalid numeric input[in function check_num]\nExpected positive integer, found: {}", num)),
-    };
-    if num == 0 {
-        error(&format!("Zero value detected[in function check_num]\nPositive integer required, found: {}", num));
-    }
-    num
-}
-
-/// Turn a Cli struct to a Info struct.
-pub fn cli_to_info(cli: Cli) -> Info {
-    let output = Info {
-        secs_for_normal_loop: convert_num(&cli.secs_for_normal_loop),
-        secs_for_emergency_loop: convert_num(&cli.secs_for_emergency_loop),
-        times_for_emergency_loop: convert_num(&cli.times_for_emergency_loop),
-        vec_address: cli.vec_address,
-        strict: cli.strict,
-    };
-    output
-}
-
 /// Check if the number is correct natural number.
 fn check_num(num: &str) {
     let _: u64 = match num.parse() {
@@ -58,3 +35,18 @@ fn check_num(num: &str) {
         error(&format!("Zero value detected[in function check_num]\nPositive integer required, found: {}", num));
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
