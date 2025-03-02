@@ -1,4 +1,5 @@
 use crate::libs::io::{run_command, error};
+use pingdown::Output;
 
 /// Tests connectivity to a single target using system ping command
 fn get_status(ip: &str) -> bool {
@@ -24,7 +25,7 @@ fn get_status(ip: &str) -> bool {
 }
 
 /// Evaluates connectivity status across multiple targets according to monitoring mode
-pub fn check_status(vec_address: &Vec<String>, strict: &bool) -> bool {
+pub fn check_status(vec_address: &Vec<String>, strict: &bool, output: &mut Output) -> bool {
     let mut status_vec: Vec<bool> = vec![];
     for ip in vec_address {
         let status = get_status(ip);

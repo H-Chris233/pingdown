@@ -47,20 +47,21 @@ pub struct Info {
 }
 
 /// Serde default functions (standalone for function pointer requirements, easier maintenance)
-fn default_60() -> u64 { 60 }  // Normal loop interval
-fn default_20() -> u64 { 20 }  // Emergency loop interval
-fn default_3() -> u64 { 3 }    // Emergency loop count
+fn default_60() -> u64 {60}  // Normal loop interval
+fn default_20() -> u64 {20}  // Emergency loop interval
+fn default_3() -> u64 {3}    // Emergency loop count
+
 
 #[derive(Debug, Serialize)]
 pub struct Output {
     #[serde(alias = "total-succeeds")]
-    total_succeeds: u64,
+    pub total_succeeds: u64,
     #[serde(alias = "total-failures")]
-    total_failures: u64,
+    pub total_failures: u64,
     #[serde(alias = "total-normal-loop-times")]
-    total_normal_loop_times: u64,
+    pub total_normal_loop_times: u64,
     #[serde(alias = "total-emergency-loop-times")]
-    total_emergency_loop_times: u64,
+    pub total_emergency_loop_times: u64,
 }
 
 
