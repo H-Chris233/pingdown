@@ -1,5 +1,5 @@
 //! Configuration processing module: Handles config file reading, parameter conversion, struct transformations
-use pingdown::{Info, Cli};
+use pingdown::{Info, Cli, Output};
 use std::fs;
 use crate::libs::io::error;
 use std::fmt::Debug;

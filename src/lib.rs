@@ -52,7 +52,7 @@ fn default_20() -> u64 { 20 }  // Emergency loop interval
 fn default_3() -> u64 { 3 }    // Emergency loop count
 
 #[derive(Debug, Serialize)]
-struct Output {
+pub struct Output {
     #[serde(alias = "total-succeeds")]
     total_succeeds: u64,
     #[serde(alias = "total-failures")]
