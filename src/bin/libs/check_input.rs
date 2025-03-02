@@ -1,6 +1,6 @@
 use regex::Regex;
 use crate::libs::io::error;
-use pingdown::{Cli};
+use pingdown::Cli;
 use crate::libs::struct_info::convert_num;
 
 /// Validates command-line inputs using regular expressions

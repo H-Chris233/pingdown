@@ -7,7 +7,7 @@ use crate::libs::check_input::{check_cli};
 use crate::libs::loops::normal_loop;
 use crate::libs::struct_info::*;
 use crate::libs::io::*;
-use pingdown::{Cli};
+use pingdown::Cli;
 use clap::Parser;
 
 /// Handles command-line argument processing and terminal encoding configuration.
@@ -23,10 +23,10 @@ fn main() {
             cli_to_info(cli)
         }
     };
-    info.output_info();
     #[cfg(windows)]
     cmd_to_utf8();
     
+    info.output_info();
     normal_loop(&info.vec_address, &info);
 }
 

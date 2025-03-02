@@ -8,13 +8,12 @@ fn get_status(ip: &str) -> bool {
     #[cfg(windows)]
     let command = format!("ping -n 1 {}", ip);
 
-    let message = format!("Started pinging {}...", ip);
+    let message = format!("Pinging {}...", ip);
     let output = match run_command(&command, Some(&message)) {
         Ok(output) => output, // Gets command output
         Err(_) => error("executing command[in get_status]"),
     };
     let status = String::from_utf8_lossy(&output.stdout).to_string(); // Converts byte stream to UTF-8 string with invalid character handling
-    println!("Started checking {}...", ip);
     if status.contains("TTL") || status.contains("ttl") { // Checks for TTL presence to determine success
          println!("Success.");
          true
@@ -31,19 +30,35 @@ pub fn check_status(vec_address: &Vec<String>, strict: &bool) -> bool {
         let status = get_status(ip);
         status_vec.push(status);
     }
+    let mut success: u64 = 0;
+    let mut failure: u64 = 0;
     let status = match strict {
         false => {
-            match status_vec.contains(&true) { // Default mode: any successful connection passes
-                true => true,
-                false => false,
+            for status in status_vec {
+                match status { // Default mode: any successful connection passes
+                    true => success += 1,
+                    false => failure += 1,
+                }
             }
+            if success > 0 {true} else{false}
         },
         true => {
-            match status_vec.contains(&false) { // Strict mode: requires all connections to succeed
-                true => false,
-                false => true,
+            for status in status_vec {
+                match status { // Strict mode: requires all connections to succeed
+                    true => success += 1,
+                    false => failure += 1,
+                }
             }
+            if failure > 0 {false} else{true}
         },
     };
+    println!("Succeeds:{},\nFailures:{}", success, failure);
     status
 }
+
+
+
+
+
+
+
