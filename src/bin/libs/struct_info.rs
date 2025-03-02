@@ -75,7 +75,19 @@ pub trait StructInfo: Debug {
 }
 
 // Implements debug interface for CLI and config structs
-impl StructInfo for Cli{}
-impl StructInfo for Info{}
+impl StructInfo for Cli {}
+impl StructInfo for Info {}
+impl StructInfo for Output {
+    fn output_info(&self) {
+        println!("{:#?}", self);
+    }
+}
+
+
+
+
+
+
+
 
 
