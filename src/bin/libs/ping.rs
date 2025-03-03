@@ -31,31 +31,50 @@ pub fn check_status(vec_address: &Vec<String>, strict: &bool, output: &mut Outpu
         let status = get_status(ip);
         status_vec.push(status);
     }
-    let mut success: u64 = 0;
-    let mut failure: u64 = 0;
+    let mut succeeds = 0;
+    let mut failures = 0;
+    let mut total_succeeds = &mut output.total_succeeds;
+    let mut total_failure = &mut output.total_failures;
     let status = match strict {
         false => {
             for status in status_vec {
-                match status { // Default mode: any successful connection passes
-                    true => success += 1,
-                    false => failure += 1,
+                match status { 
+                    true => {
+                        succeeds += 1;
+                        *total_succeeds += 1;
+                    }
+                    false => {
+                        failures += 1;
+                        *total_failure += 1;
+                    }
                 }
             }
-            if success > 0 {true} else{false}
+            if succeeds > 0 {true} else{false}// Default mode: any successful connection passes
         },
         true => {
             for status in status_vec {
-                match status { // Strict mode: requires all connections to succeed
-                    true => success += 1,
-                    false => failure += 1,
+                match status { 
+                    true => {
+                        succeeds += 1;
+                        *total_succeeds += 1;
+                    }
+                    false => {
+                        failures += 1;
+                        *total_failure += 1;
+                    }
                 }
             }
-            if failure > 0 {false} else{true}
+            if failures > 0 {false} else{true}// Strict mode: requires all connections to succeed
         },
     };
-    println!("Succeeds:{},\nFailures:{}", success, failure);
+    println!("Succeeds:{},\nFailures:{}", succeeds, failures);
     status
 }
+
+
+
+
+
 
 
 
