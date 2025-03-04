@@ -1,5 +1,5 @@
 //! Configuration processing module: Handles config file reading, parameter conversion, struct transformations
-use pingdown::{Info, Cli, Output};
+use pingdown::{Info, Cli, RuntimeInfo};
 use std::fs;
 use crate::libs::io::error;
 use std::fmt::Debug;
@@ -77,11 +77,6 @@ pub trait StructInfo: Debug {
 // Implements debug interface for CLI and config structs
 impl StructInfo for Cli {}
 impl StructInfo for Info {}
-impl StructInfo for Output {
-    fn output_info(&self) {
-        println!("{:#?}", self);
-    }
-}
 
 
 

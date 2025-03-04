@@ -1,5 +1,5 @@
 use crate::libs::io::{run_command, error};
-use pingdown::Output;
+use pingdown::RuntimeInfo;
 
 /// Tests connectivity to a single target using system ping command
 fn get_status(ip: &str) -> bool {
@@ -25,7 +25,7 @@ fn get_status(ip: &str) -> bool {
 }
 
 /// Evaluates connectivity status across multiple targets according to monitoring mode
-pub fn check_status(vec_address: &Vec<String>, strict: &bool, output: &mut Output) -> bool {
+pub fn check_status(vec_address: &Vec<String>, strict: &bool, runtime_info: &mut RuntimeInfo) -> bool {
     let mut status_vec: Vec<bool> = vec![];
     for ip in vec_address {
         let status = get_status(ip);
@@ -33,8 +33,8 @@ pub fn check_status(vec_address: &Vec<String>, strict: &bool, output: &mut Outpu
     }
     let mut succeeds = 0;
     let mut failures = 0;
-    let mut total_succeeds = &mut output.total_succeeds;
-    let mut total_failure = &mut output.total_failures;
+    let mut total_succeeds = &mut runtime_info.total_succeeds;
+    let mut total_failure = &mut runtime_info.total_failures;
     let status = match strict {
         false => {
             for status in status_vec {

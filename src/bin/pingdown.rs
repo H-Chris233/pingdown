@@ -7,7 +7,7 @@ use crate::libs::check_input::{check_cli};
 use crate::libs::loops::normal_loop;
 use crate::libs::struct_info::*;
 use crate::libs::io::*;
-use pingdown::{Cli, Output};
+use pingdown::{Cli, RuntimeInfo};
 use clap::Parser;
 
 /// Handles command-line argument processing and terminal encoding configuration.
@@ -27,13 +27,8 @@ fn main() {
     cmd_to_utf8();
     
     info.output_info();
-    let mut output = Output {
-        total_succeeds: 0,
-        total_failures: 0,
-        total_normal_loop_times: 0,
-        total_emergency_loop_times: 0,
-    };
-    normal_loop(&info, &mut output);
+    let mut runtime_info = RuntimeInfo::new();
+    normal_loop(&info, &mut runtime_info);
 }
 
 
