@@ -10,9 +10,19 @@ use crate::libs::io::*;
 use pingdown::{Cli, RuntimeInfo};
 use clap::Parser;
 
+use ctrlc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+
 /// Handles command-line argument processing and terminal encoding configuration.
 /// Serves as the main entry point for the application.
 fn main() {
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+    }).expect("Error setting Ctrl-C handler");
+    
     let cli = Cli::parse();
     let info = match &cli.read_json {
         true => {
