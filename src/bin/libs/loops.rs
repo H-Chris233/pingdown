@@ -1,6 +1,7 @@
-use pingdown::{Info, RuntimeInfo};
+use pingdown::Info;
 use crate::libs::ping::check_status;
 use crate::libs::io::{sleep, error, shutdown};
+use crate::libs::output_file::RuntimeInfo;
 
 /// Continuously monitors connectivity in regular intervals
 pub fn normal_loop(info: &Info, runtime_info: &mut RuntimeInfo) {

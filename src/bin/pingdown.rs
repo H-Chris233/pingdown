@@ -1,13 +1,14 @@
-#![allow(dead_code)]
-#![allow(unused)]
+//#![allow(dead_code)]
+//#![allow(unused)]
 
 mod libs;
 
 use crate::libs::check_input::{check_cli};
 use crate::libs::loops::normal_loop;
 use crate::libs::struct_info::*;
+use crate::libs::output_file::*;
 use crate::libs::io::*;
-use pingdown::{Cli, RuntimeInfo};
+use pingdown::Cli;
 use clap::Parser;
 
 use ctrlc;

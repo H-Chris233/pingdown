@@ -1,5 +1,5 @@
 use crate::libs::io::{run_command, error};
-use pingdown::RuntimeInfo;
+use crate::libs::output_file::RuntimeInfo;
 
 /// Tests connectivity to a single target using system ping command
 fn get_status(ip: &str) -> bool {
