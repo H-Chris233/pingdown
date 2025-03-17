@@ -16,9 +16,6 @@ pub struct RuntimeInfo {
 }
 
 
-
-
-
 impl RuntimeInfo {
     pub fn new() -> RuntimeInfo {
         let output = RuntimeInfo {
@@ -29,21 +26,5 @@ impl RuntimeInfo {
         };
         output
     }
-    pub fn output(&self) {
-        println!("{:#?}", self);
-    }
-    pub fn write(runtime_info: &RuntimeInfo) {
-        match fs::write("pingdown_runtime_info.txt", &format!("{:#?}", runtime_info)) {
-            Ok(()) => {},
-            Err(_) => error("writing output file, please check your permission"),
-        }
-    }
+    
 }
-
-
-
-
-
-
-
-

@@ -4,13 +4,9 @@ use crate::libs::check_input::{check_cli};
 use crate::libs::loops::normal_loop;
 use crate::libs::struct_info::*;
 use crate::libs::output_file::*;
-use crate::libs::io::*;
 use pingdown::Cli;
 use clap::Parser;
 
-use ctrlc;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 
 /// Handles command-line argument processing and terminal encoding configuration.
 /// Serves as the main entry point for the application.
