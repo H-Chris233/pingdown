@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[command(about, long_about = None)]
 #[command(name = "pingdown")]
 #[command(author = "H-Chris233")]
-#[command(version = "1.3.4")]
+#[command(version = "1.3.8")]
 pub struct Cli {
     /// Target IP address(es) or domain name(s) to check
     pub vec_address: Vec<String>,
@@ -31,26 +31,35 @@ pub struct Cli {
     pub times_for_emergency_loop: String,
 }
 
+/// Configuration parameter structure supporting JSON serialization/deserialization
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Info {
-    #[serde(alias = "address")]
+    #[serde(alias = "address")]  // Alias mapping: JSON field -> struct field
     pub vec_address: Vec<String>,
-    #[serde(default)]
+    #[serde(default)]  // Allow missing field, use bool default (false)
     pub strict: bool,
-    #[serde(alias = "secs-for-normal-loop", default = "default_60")]
+    #[serde(alias = "secs-for-normal-loop", default = "default_60")]    // Alias | Default: 60
     pub secs_for_normal_loop: u64,
-    #[serde(alias = "secs-for-emergency-loop", default = "default_20")]
+    #[serde(alias = "secs-for-emergency-loop", default = "default_20")]  // Alias | Default: 20
     pub secs_for_emergency_loop: u64,
-    #[serde(alias = "times-for-emergency-loop", default = "default_3")]
+    #[serde(alias = "times-for-emergency-loop", default = "default_3")] // Alias | Default: 3
     pub times_for_emergency_loop: u64,
 }
 
-fn default_60() -> u64 {
-    60
-}
-fn default_20() -> u64 {
-    20
-}
-fn default_3() -> u64 {
-    3
-}
+/// Serde default functions (standalone for function pointer requirements, easier maintenance)
+fn default_60() -> u64 {60}  // Normal loop interval
+fn default_20() -> u64 {20}  // Emergency loop interval
+fn default_3() -> u64 {3}    // Emergency loop count
+
+
+
+
+
+
+
+
+
+
+
+
+
