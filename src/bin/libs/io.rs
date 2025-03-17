@@ -69,5 +69,3 @@ pub fn error(message: &str) -> ! {
 pub fn sleep(time: u64) {
     thread::sleep(Duration::from_secs(time));
 }
-
-

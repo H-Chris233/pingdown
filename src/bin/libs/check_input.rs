@@ -35,18 +35,3 @@ fn check_num(num: &str) {
         error(&format!("Zero value detected[in function check_num]\nPositive integer required, found: {}", num));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

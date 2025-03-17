@@ -48,12 +48,3 @@ fn emergency_loop(info: &Info, runtime_info: &mut RuntimeInfo) {
     println!("Reconnected!!!");
     println!("Exiting {}sec emergency loop...", secs);
 }
-
-
-
-
-
-
-
-
-

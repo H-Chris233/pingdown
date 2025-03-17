@@ -77,12 +77,3 @@ pub trait StructInfo: Debug {
 // Implements debug interface for CLI and config structs
 impl StructInfo for Cli {}
 impl StructInfo for Info {}
-
-
-
-
-
-
-
-
-

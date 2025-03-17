@@ -7,11 +7,9 @@ use crate::libs::output_file::*;
 use pingdown::Cli;
 use clap::Parser;
 
-
 /// Handles command-line argument processing and terminal encoding configuration.
 /// Serves as the main entry point for the application.
 fn main() {
-    
     let cli = Cli::parse();
     let info = match &cli.read_json {
         true => {
@@ -29,12 +27,3 @@ fn main() {
     let mut runtime_info = RuntimeInfo::new();
     normal_loop(&info, &mut runtime_info);
 }
-
-
-
-
-
-
-
-
-
