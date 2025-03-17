@@ -33,8 +33,8 @@ pub fn check_status(vec_address: &Vec<String>, strict: &bool, runtime_info: &mut
     }
     let mut succeeds = 0;
     let mut failures = 0;
-    let mut total_succeeds = &mut runtime_info.total_succeeds;
-    let mut total_failure = &mut runtime_info.total_failures;
+    let total_succeeds = &mut runtime_info.total_succeeds;
+    let total_failure = &mut runtime_info.total_failures;
     let status = match strict {
         false => {
             for status in status_vec {

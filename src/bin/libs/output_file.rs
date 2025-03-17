@@ -16,9 +16,6 @@ pub struct RuntimeInfo {
 }
 
 
-
-
-
 impl RuntimeInfo {
     pub fn new() -> RuntimeInfo {
         let output = RuntimeInfo {
@@ -39,6 +36,7 @@ impl RuntimeInfo {
         }
     }
 }
+
 
 
 

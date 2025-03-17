@@ -1,7 +1,7 @@
 [package]
 name = "pingdown"
-version = "1.3.8"
-authors = ["Chris233 h-chris233@qq.com"]
+version = "1.4.2"
+authors = ["Chris233 h-chris233@outlook.com"]
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/H-Chris233/pingdown/"
@@ -9,6 +9,7 @@ default-run = "pingdown"
 
 [dependencies]
 clap = { version = "4.5.30", features = ["derive"] }
+crossbeam-channel = "0.5.14"
 ctrlc = "3.4.5"
 regex = "1.11.1"
 serde = { version = "1.0.218", features = ["derive"] }
