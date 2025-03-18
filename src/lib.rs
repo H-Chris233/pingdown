@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[command(about, long_about = None)]
 #[command(name = "pingdown")]
 #[command(author = "H-Chris233")]
-#[command(version = "1.4.4")]
+#[command(version = "1.4.5")]
 pub struct Cli {
     /// Target IP address(es) or domain name(s) to check
     pub vec_address: Vec<String>,

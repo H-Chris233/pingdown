@@ -3,7 +3,9 @@
 
 mod libs;
 
-use crate::libs::check_input::{check_cli};
+use crate::libs::check_input:: {
+    check_cli
+};
 use crate::libs::loops::normal_loop;
 use crate::libs::struct_info::*;
 use crate::libs::output_file::*;
@@ -12,15 +14,15 @@ use pingdown::Cli;
 use clap::Parser;
 
 use ctrlc;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::atomic:: {AtomicBool, Ordering};
+use std::sync:: {Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use crossbeam_channel::{select, tick};
+use crossbeam_channel:: {select, tick};
 
 
 fn main() {
-    let mut runtime_info = Arc::new(Mutex::new(RuntimeInfo::new()));
+    let runtime_info = Arc::new(Mutex::new(RuntimeInfo::new()));
     let runtime_info_clone = Arc::clone(&runtime_info);
     // 共享原子标志位和信号通道
     let ctrlc_flag = Arc::new(AtomicBool::new(false));
@@ -34,7 +36,7 @@ fn main() {
         Ok(()) => {},
         Err(err) => error(&format!("setting ctrl+c handler[{}]", err)),
     }
-    
+
     thread::spawn(move || {
         loop {
             select! {
@@ -70,10 +72,13 @@ fn entry(runtime_info: Arc<Mutex<RuntimeInfo>>) {
     };
     #[cfg(windows)]
     cmd_to_utf8();
-    
+
     info.output_info();
     normal_loop(&info, runtime_info);
 }
+
+
+
 
 
 
