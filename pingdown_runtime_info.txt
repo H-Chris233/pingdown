@@ -1,6 +1,0 @@
-RuntimeInfo {
-    total_succeeds: 5,
-    total_failures: 10,
-    total_normal_loop_times: 5,
-    total_emergency_loop_times: 0,
-}
