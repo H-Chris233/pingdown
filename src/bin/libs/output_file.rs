@@ -29,8 +29,8 @@ impl RuntimeInfo {
     pub fn output(&self) {
         println!("{:#?}", self);
     }
-    pub fn write(runtime_info: &RuntimeInfo) {
-        match fs::write("pingdown_runtime_info.txt", &format!("{:#?}", runtime_info)) {
+    pub fn write(&self) {
+        match fs::write("pingdown_runtime_info.txt", &format!("{:#?}", self)) {
             Ok(()) => {},
             Err(_) => error("writing output file, please check your permission"),
         }

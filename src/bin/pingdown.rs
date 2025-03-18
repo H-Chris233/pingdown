@@ -41,6 +41,8 @@ fn main() {
                     if ctrlc_flag.load(Ordering::SeqCst) {
                         println!("Write file and exit...");
                         
+                        
+                        
                         std::process::exit(0);
                     }
                 }
