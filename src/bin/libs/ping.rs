@@ -1,5 +1,6 @@
 use crate::libs::io::{run_command, error};
-use crate::libs::output_file::RuntimeInfo;
+use crate::libs::output_file::{RuntimeInfo, Info, add_one};
+use std::sync::{Arc, Mutex};
 
 /// Tests connectivity to a single target using system ping command
 fn get_status(ip: &str) -> bool {
@@ -25,7 +26,7 @@ fn get_status(ip: &str) -> bool {
 }
 
 /// Evaluates connectivity status across multiple targets according to monitoring mode
-pub fn check_status(vec_address: &Vec<String>, strict: &bool, runtime_info: &mut RuntimeInfo) -> bool {
+pub fn check_status(vec_address: &Vec<String>, strict: &bool, runtime_info: &Arc<Mutex<RuntimeInfo>>) -> bool {
     let mut status_vec: Vec<bool> = vec![];
     for ip in vec_address {
         let status = get_status(ip);
@@ -33,19 +34,17 @@ pub fn check_status(vec_address: &Vec<String>, strict: &bool, runtime_info: &mut
     }
     let mut succeeds = 0;
     let mut failures = 0;
-    let total_succeeds = &mut runtime_info.total_succeeds;
-    let total_failure = &mut runtime_info.total_failures;
     let status = match strict {
         false => {
             for status in status_vec {
                 match status { 
                     true => {
                         succeeds += 1;
-                        *total_succeeds += 1;
+                        add_one(runtime_info, Info::Succeeds);
                     }
                     false => {
                         failures += 1;
-                        *total_failure += 1;
+                        add_one(runtime_info, Info::Failures);
                     }
                 }
             }
@@ -56,11 +55,11 @@ pub fn check_status(vec_address: &Vec<String>, strict: &bool, runtime_info: &mut
                 match status { 
                     true => {
                         succeeds += 1;
-                        *total_succeeds += 1;
+                        add_one(runtime_info, Info::Succeeds);
                     }
                     false => {
                         failures += 1;
-                        *total_failure += 1;
+                        add_one(runtime_info, Info::Failures);
                     }
                 }
             }

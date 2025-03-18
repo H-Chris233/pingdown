@@ -1,5 +1,5 @@
 //! Configuration processing module: Handles config file reading, parameter conversion, struct transformations
-use pingdown::{Info, Cli};
+use pingdown::{JsonInfo, Cli};
 use std::fs;
 use crate::libs::io::error;
 use std::fmt::Debug;
@@ -12,12 +12,12 @@ use std::fmt::Debug;
 /// # Error Handling
 /// - File read failure: Terminates process via error()
 /// - JSON parse failure: Terminates process via error()
-pub fn read_json() -> Info {
+pub fn read_json() -> JsonInfo {
     let json_str = match fs::read_to_string("./config.json") {
         Ok(json_str) => json_str,
         Err(err) => error(&format!("reading JSON file.\n{}", err)),
     };
-    let config: Info = match serde_json::from_str(&json_str) {
+    let config: JsonInfo = match serde_json::from_str(&json_str) {
         Ok(json_info) => json_info,
         Err(err) => error(&format!("parsing JSON file.\n{}", err)),
     };
@@ -50,8 +50,8 @@ pub fn convert_num(num: &str) -> u64 {
 /// - Numeric fields: Safely converted via convert_num
 /// - Address list: Direct mapping
 /// - Strict mode: Direct mapping
-pub fn cli_to_info(cli: Cli) -> Info {
-    let output = Info {
+pub fn cli_to_info(cli: Cli) -> JsonInfo {
+    let output = JsonInfo {
         secs_for_normal_loop: convert_num(&cli.secs_for_normal_loop),
         secs_for_emergency_loop: convert_num(&cli.secs_for_emergency_loop),
         times_for_emergency_loop: convert_num(&cli.times_for_emergency_loop),
@@ -76,7 +76,7 @@ pub trait StructInfo: Debug {
 
 // Implements debug interface for CLI and config structs
 impl StructInfo for Cli {}
-impl StructInfo for Info {}
+impl StructInfo for JsonInfo {}
 
 
 

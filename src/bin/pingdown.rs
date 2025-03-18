@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-//#![allow(unused)]
+#![allow(unused)]
 
 mod libs;
 
@@ -13,14 +13,15 @@ use clap::Parser;
 
 use ctrlc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 use crossbeam_channel::{select, tick};
 
 
 fn main() {
-    let mut runtime_info = RuntimeInfo::new();
+    let mut runtime_info = Arc::new(Mutex::new(RuntimeInfo::new()));
+    let runtime_info_clone = Arc::clone(&runtime_info);
     // 共享原子标志位和信号通道
     let ctrlc_flag = Arc::new(AtomicBool::new(false));
     let ctrlc_clone = ctrlc_flag.clone();
@@ -40,21 +41,23 @@ fn main() {
                 recv(ticker) -> _ => {
                     if ctrlc_flag.load(Ordering::SeqCst) {
                         println!("Write file and exit...");
-                        
-                        
-                        
+                        let output = match runtime_info_clone.lock() {
+                            Ok(output) => output,
+                            Err(err) => error(&format!("locking files.[{}]", err))
+                        };
+                        output.write();
                         std::process::exit(0);
                     }
                 }
             }
         }
     });
-    entry(&mut runtime_info);
+    entry(runtime_info);
 }
 
 /// Handles command-line argument processing and terminal encoding configuration.
 /// Serves as the main entry point for the application.
-fn entry(runtime_info: &mut RuntimeInfo) {
+fn entry(runtime_info: Arc<Mutex<RuntimeInfo>>) {
     let cli = Cli::parse();
     let info = match &cli.read_json {
         true => {
