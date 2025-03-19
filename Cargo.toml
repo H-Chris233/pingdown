@@ -1,6 +1,6 @@
 [package]
 name = "pingdown"
-version = "1.4.5"
+version = "1.4.6"
 authors = ["Chris233 h-chris233@outlook.com"]
 edition = "2021"
 readme = "README.md"

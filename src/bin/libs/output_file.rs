@@ -2,23 +2,17 @@
 
 use std::fs;
 use crate::libs::io::error;
-use serde::Serialize;
 use std::sync:: {
     Arc,
     Mutex
 };
 
 /// Tracks various runtime metrics for monitoring and reporting.
-/// Serialized with aliases for JSON field naming conventions.
-#[derive(Debug, Serialize)]
+#[derive(Debug)]
 pub struct RuntimeInfo {
-    #[serde(alias = "total-succeeds")]
     pub total_succeeds: u64,
-    #[serde(alias = "total-failures")]
     pub total_failures: u64,
-    #[serde(alias = "total-normal-loop-times")]
     pub total_normal_loop_times: u64,
-    #[serde(alias = "total-emergency-loop-times")]
     pub total_emergency_loop_times: u64,
 }
 

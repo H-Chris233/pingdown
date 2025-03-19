@@ -1,7 +1,6 @@
 use regex::Regex;
 use crate::libs::io::error;
 use pingdown::Cli;
-use crate::libs::struct_info::convert_num;
 
 /// Validates CLI arguments:
 /// - Requires at least one address
