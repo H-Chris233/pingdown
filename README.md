@@ -4,6 +4,8 @@
 
 A Rust-based intelligent network monitoring tool that triggers system shutdown when critical connections are lost.
 
+**You must have *ping* insalled on your environment.**
+
 ```bash
 # Build from source
 cargo build --release
