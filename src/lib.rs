@@ -1,11 +1,11 @@
-pub use clap::Parser;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
 
 #[derive(Parser, Debug)]
 #[command(about, long_about = None)]
 #[command(name = "pingdown")]
 #[command(author = "H-Chris233")]
-#[command(version = "1.3.8")]
+#[command(version = "1.4.6")]
 pub struct Cli {
     /// Target IP address(es) or domain name(s) to check
     pub vec_address: Vec<String>,
@@ -33,7 +33,7 @@ pub struct Cli {
 
 /// Configuration parameter structure supporting JSON serialization/deserialization
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Info {
+pub struct JsonInfo {
     #[serde(alias = "address")]  // Alias mapping: JSON field -> struct field
     pub vec_address: Vec<String>,
     #[serde(default)]  // Allow missing field, use bool default (false)

@@ -60,7 +60,7 @@ pub fn cmd_to_utf8() {
 
 /// Terminates program after critical errors with diagnostic information
 pub fn error(message: &str) -> ! {
-    eprintln!("An error occurred during {}\nif it's not your fault, please contact h-chris233@qq.com or open an issue on https://www.github.com/H-Chris233/pingdown", message);
+    eprintln!("An error occurred during {}\nif it's not your fault, please contact h-chris233@outlook.com or open an issue on https://www.github.com/H-Chris233/pingdown", message);
     sleep(5);
     std::process::exit(1);
 }
