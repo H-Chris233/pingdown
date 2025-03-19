@@ -24,26 +24,6 @@ pub fn read_json() -> JsonInfo {
     config
 }
 
-/// Numeric parameter validator/converter
-/// 
-/// # Functionality
-/// 1. Converts string to u64 integer
-/// 2. Validates non-zero positive integer
-/// 
-/// # Error Handling
-/// - Parse failure: Triggers error() with invalid input
-/// - Zero value: Triggers error() requiring positive integer
-pub fn convert_num(num: &str) -> u64 {
-    let num: u64 = match num.parse() {
-        Ok(num) => num,
-        Err(_) => error(&format!("Invalid numeric input[in function check_num]\nExpected positive integer, found: {}", num)),
-    };
-    if num == 0 {
-        error(&format!("Zero value detected[in function check_num]\nPositive integer required, found: {}", num));
-    }
-    num
-}
-
 /// CLI arguments to config struct converter
 /// 
 /// # Conversion Logic
@@ -51,14 +31,13 @@ pub fn convert_num(num: &str) -> u64 {
 /// - Address list: Direct mapping
 /// - Strict mode: Direct mapping
 pub fn cli_to_info(cli: Cli) -> JsonInfo {
-    let output = JsonInfo {
+    JsonInfo {
         secs_for_normal_loop: convert_num(&cli.secs_for_normal_loop),
         secs_for_emergency_loop: convert_num(&cli.secs_for_emergency_loop),
         times_for_emergency_loop: convert_num(&cli.times_for_emergency_loop),
         vec_address: cli.vec_address,
         strict: cli.strict,
-    };
-    output
+    }
 }
 
 /// Configuration debugging interface
@@ -79,7 +58,25 @@ impl StructInfo for Cli {}
 impl StructInfo for JsonInfo {}
 
 
-
+/// Numeric parameter validator/converter
+/// 
+/// # Functionality
+/// 1. Converts string to u64 integer
+/// 2. Validates non-zero positive integer
+/// 
+/// # Error Handling
+/// - Parse failure: Triggers error() with invalid input
+/// - Zero value: Triggers error() requiring positive integer
+pub fn convert_num(num: &str) -> u64 {
+    let num: u64 = match num.parse() {
+        Ok(num) => num,
+        Err(_) => error(&format!("Invalid numeric input[in function check_num]\nExpected positive integer, found: {}", num)),
+    };
+    if num == 0 {
+        error(&format!("Zero value detected[in function check_num]\nPositive integer required, found: {}", num));
+    }
+    num
+}
 
 
 
