@@ -29,20 +29,13 @@ pub fn ctrlc_init() -> Arc<Mutex<RuntimeInfo>> {
         loop {
             select! {
                 recv(ticker) -> _ => {
-                    // Check termination flag every tick interval
-                    if ctrlc_flag.load(Ordering::SeqCst) {
+                    if ctrlc_flag.load(Ordering::SeqCst) { // Check termination flag every 80 millis
                         println!("Writing final results and exiting...");
-                        
-                        // Safely acquire lock for final output operations
                         let output = runtime_info_clone.lock()
                         .unwrap_or_else(|err| error(&format!("locking runtime info: {}", err)));
-                        
-                        // Execute final persistence routines
-                        output.output();
+                        output.output();//Print on the screen
                         output.write();
-                        
-                        // Force exit after cleanup
-                        std::process::exit(0);
+                        std::process::exit(0);// Force exit after writing file
                     }
                 }
             }
