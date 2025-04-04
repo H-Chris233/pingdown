@@ -17,6 +17,7 @@ use crate::libs::check_input::check_cli;
 use crate::libs::loops::normal_loop;
 use crate::libs::ctrlc::ctrlc_init;
 use crate::libs::struct_info::*;
+use crate::libs::io::cmd_to_utf8;
 use pingdown::Cli;
 use clap::Parser;
 
