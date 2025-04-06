@@ -2,10 +2,7 @@
 
 use std::fs;
 use crate::libs::io::error;
-use std::sync:: {
-    Arc,
-    Mutex
-};
+use std::sync:: {Arc, Mutex};
 
 /// Tracks various runtime metrics for monitoring and reporting.
 #[derive(Debug)]

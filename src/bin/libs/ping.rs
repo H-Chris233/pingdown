@@ -69,15 +69,3 @@ pub fn check_status(vec_address: &Vec<String>, strict: &bool, runtime_info: &Arc
     println!("Succeeds:{},\nFailures:{}", succeeds, failures);
     status
 }
-
-
-
-
-
-
-
-
-
-
-
-

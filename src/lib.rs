@@ -50,16 +50,3 @@ pub struct JsonInfo {
 fn default_60() -> u64 {60}  // Normal loop interval
 fn default_20() -> u64 {20}  // Emergency loop interval
 fn default_3() -> u64 {3}    // Emergency loop count
-
-
-
-
-
-
-
-
-
-
-
-
-

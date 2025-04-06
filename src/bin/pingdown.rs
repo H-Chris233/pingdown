@@ -11,15 +11,13 @@
 //! - [`RuntimeInfo`] tracking runtime state
 //! - [`Info`] storing monitoring parameters
 
-#![allow(dead_code)]
-#![allow(unused)]
-
 mod libs;
 
 use crate::libs::check_input::check_cli;
 use crate::libs::loops::normal_loop;
 use crate::libs::ctrlc::ctrlc_init;
 use crate::libs::struct_info::*;
+use crate::libs::io::cmd_to_utf8;
 use pingdown::Cli;
 use clap::Parser;
 
@@ -33,7 +31,7 @@ use clap::Parser;
 /// 5. Launch monitoring loop
 ///
 /// # Implementation Notes
-/// - Automatic Windows console UTF-8 encoding fix
+/// - Windows console UTF-8 encoding fix
 /// - JSON configuration takes priority over CLI args
 /// - Graceful exit via signal handling
 fn main() {
@@ -59,5 +57,5 @@ fn main() {
 
     // Output validated configuration and start monitoring
     info.output_info();
-    normal_loop(&info, runtime_info);
+    normal_loop(info, runtime_info);
 }
