@@ -3,6 +3,7 @@ use std::time::Duration;
 use std::thread;
 use std::process::Output;
 use std::io;
+use colored::Colorize;
 
 /// Unix command line execution (sh)
 #[cfg(unix)]
@@ -60,7 +61,7 @@ pub fn cmd_to_utf8() {
 
 /// Terminates program after critical errors with diagnostic information
 pub fn error(message: &str) -> ! {
-    eprintln!("An error occurred during {}\nif it's not your fault, please contact h-chris233@outlook.com or open an issue on https://www.github.com/H-Chris233/pingdown", message);
+    eprintln!("\nAn {} occurred during {}\nif it's {} your fault, please contact {} or new an issue on https://www.github.com/H-Chris233/pingdown", "Error".red().bold(), message, "not".yellow().bold(), "h-chris233@outlook.com".blue());
     sleep(5);
     std::process::exit(1);
 }

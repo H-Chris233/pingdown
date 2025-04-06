@@ -19,7 +19,7 @@ pub fn check_cli(cli: &Cli) {
 
     // Require minimum one address
     if cli.vec_address.is_empty() {
-        println!("Provide at least one IP/website\nUse -h for help");
+        println!("\nPlease provide at least one IP/website\nUse -h for help");
         error("No target addresses detected");
     }
 

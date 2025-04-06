@@ -2,13 +2,14 @@
 name = "pingdown"
 version = "1.4.6"
 authors = ["Chris233 h-chris233@outlook.com"]
-edition = "2021"
+edition = "2024"
 readme = "README.md"
 repository = "https://github.com/H-Chris233/pingdown/"
 default-run = "pingdown"
 
 [dependencies]
-clap = { version = "4.5.30", features = ["derive"] }
+clap = { version = "4.5.35", features = ["derive"] }
+colored = "3.0.0"
 crossbeam-channel = "0.5.14"
 ctrlc = "3.4.5"
 regex = "1.11.1"
