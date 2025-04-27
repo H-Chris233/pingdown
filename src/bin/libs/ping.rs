@@ -48,7 +48,7 @@ pub fn check_status(vec_address: &Vec<String>, strict: &bool, runtime_info: &Arc
                     }
                 }
             }
-            if succeeds > 0 {true} else{false}// Default mode: any successful connection passes
+            succeeds > 0// Default mode: any successful connection passes
         },
         true => {
             for status in status_vec {
@@ -63,7 +63,7 @@ pub fn check_status(vec_address: &Vec<String>, strict: &bool, runtime_info: &Arc
                     }
                 }
             }
-            if failures > 0 {false} else{true}// Strict mode: requires all connections to succeed
+            failures <= 0// Strict mode: requires all connections to succeed
         },
     };
     println!("Succeeds:{},\nFailures:{}", succeeds, failures);

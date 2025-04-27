@@ -11,7 +11,7 @@ pub fn normal_loop(info: JsonInfo, runtime_info: Arc<Mutex<RuntimeInfo>>) {
     println!("Started {}sec loop...", secs);
     for i in 0.. {
         let status = check_status(vec_address, &info.strict, &runtime_info);
-        if status == false {
+        if !status {
             emergency_loop(&info, &runtime_info);
             continue;
         }
@@ -34,7 +34,7 @@ fn emergency_loop(info: &JsonInfo, runtime_info: &Arc<Mutex<RuntimeInfo>>) {
         let status = check_status(vec_address, &info.strict, &runtime_info);
         if status == true {
             break;
-        } else if time_left <= 0 {
+        } else if time_left == 0 {
             shutdown();
             error("system shutdown failed - check permissions"); // System still running indicates permission issues
         }
