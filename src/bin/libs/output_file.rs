@@ -54,7 +54,7 @@ impl RuntimeInfo {
                 total_emergency_loop_times: 0,
             } => {}
             _ => {
-                match fs::write("pingdown_runtime_info.txt", &format!("{:#?}", self)) {
+                match fs::write("pingdown_runtime_info.txt", format!("{:#?}", self)) {
                     Ok(_) => {}
                     Err(err) => error(&format!("writing output file[{}], please check your permission.", err)),
                 }

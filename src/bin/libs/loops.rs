@@ -31,8 +31,8 @@ fn emergency_loop(info: &JsonInfo, runtime_info: &Arc<Mutex<RuntimeInfo>>) {
     println!("Checking connection every {} seconds!!", secs);
     loop {
         println!("{} tries remaining...", time_left);
-        let status = check_status(vec_address, &info.strict, &runtime_info);
-        if status == true {
+        let status = check_status(vec_address, &info.strict, runtime_info);
+        if status {
             break;
         } else if time_left == 0 {
             shutdown();

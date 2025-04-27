@@ -8,10 +8,7 @@ use colored::Colorize;
 /// Unix command line execution (sh)
 #[cfg(unix)]
 pub fn run_command(command: &str, message: Option<&str>) -> io::Result<Output> {
-    match message {
-        Some(message) => println!("{}", message),
-        None => {},
-    }
+    if let Some(message) = message { println!("{}", message) }
     let output = Command::new("sh").arg("-c").arg(command).output()?;
     Ok(output)
 }
