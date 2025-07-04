@@ -22,6 +22,7 @@ use crate::libs::struct_info::*;
 use pingdown::Cli;
 use clap::Parser;
 use anyhow::{Result, Context};
+use log::{debug, error, info};
 
 #[cfg(windows)]
 use crate::libs::io::cmd_to_utf8;
@@ -40,28 +41,40 @@ use crate::libs::io::cmd_to_utf8;
 /// - JSON configuration takes priority over CLI args
 /// - Graceful exit via signal handling
 fn main() -> Result<()> {
+    // Initialize logging system
+    simple_logger::SimpleLogger::new().with_level(log::LevelFilter::Info).init()?;
+    
     // Parse CLI arguments into structured format
     let cli = Cli::parse();
+    info!("CLI arguments parsed successfully");
     
     // Initialize CTRL-C handler with runtime state tracker
-    let runtime_info = ctrlc_init()?;
+    let runtime_info = ctrlc_init().context("Failed to initialize Ctrl+C handler")?;
     
     // Configuration loading strategy:
     // - Load from JSON when --read-json flag present
     // - Otherwise validate and convert CLI arguments
     let info = if cli.read_json {
-        read_json().context("Read json failed.")?
+        info!("Loading configuration from JSON file");
+        read_json().context("Failed to load JSON configuration")?
     } else {
-        check_cli(&cli)?;
-        cli_to_info(cli).context("Read command failed.")?
+        info!("Validating CLI arguments");
+        check_cli(&cli).context("CLI arguments validation failed")?;
+        info!("Converting CLI arguments to config");
+        cli_to_info(cli).context("Failed to convert CLI arguments to config")?
     };
 
     // Windows console UTF-8 encoding enforcement
     #[cfg(windows)]
-    cmd_to_utf8();
+    {
+        info!("Configuring Windows console for UTF-8");
+        if let Err(e) = cmd_to_utf8() {
+            error!("Failed to set UTF-8 mode: {}", e);
+        }
+    }
 
     // Output validated configuration and start monitoring
     info.output_info();
-    normal_loop(info, runtime_info)?;
-    Ok(())
+    info!("Starting normal monitoring loop");
+    normal_loop(info, runtime_info).context("Monitoring loop failed")
 }
