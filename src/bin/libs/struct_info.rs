@@ -11,10 +11,10 @@ use log::{debug, error, info};
 /// - Hardcoded path: "./config.json"
 pub fn read_json() -> Result<JsonInfo> {
     let json_str = fs::read_to_string("./config.json")
-        .with_context(|| format!("Failed to read configuration file: ./config.json"))?;
+        .with_context(|| "Failed to read configuration file: ./config.json".to_string())?;
     
     serde_json::from_str(&json_str)
-        .with_context(|| format!("Failed to parse JSON configuration"))
+        .with_context(|| "Failed to parse JSON configuration".to_string())
 }
 
 /// CLI arguments to config struct converter

@@ -34,7 +34,7 @@ pub fn ctrlc_init() -> Result<Arc<Mutex<RuntimeInfo>>> {
                         info!("Writing final results and exiting...");
                         
                         // Acquire lock with error handling
-                        let mut output = match runtime_info_clone.lock() {
+                        let output = match runtime_info_clone.lock() {
                             Ok(guard) => guard,
                             Err(err) => {
                                 error!("Failed to acquire mutex lock: {:?}", err);
