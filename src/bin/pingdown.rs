@@ -11,6 +11,8 @@
 //! - [`RuntimeInfo`] tracking runtime state
 //! - [`Info`] storing monitoring parameters
 
+#[allow(unused_imports)]
+
 mod libs;
 
 use crate::libs::check_input::check_cli;
@@ -19,6 +21,7 @@ use crate::libs::ctrlc::ctrlc_init;
 use crate::libs::struct_info::*;
 use pingdown::Cli;
 use clap::Parser;
+use anyhow::{Result, Context};
 
 #[cfg(windows)]
 use crate::libs::io::cmd_to_utf8;
@@ -36,21 +39,21 @@ use crate::libs::io::cmd_to_utf8;
 /// - Windows console UTF-8 encoding fix
 /// - JSON configuration takes priority over CLI args
 /// - Graceful exit via signal handling
-fn main() {
+fn main() -> Result<()> {
     // Parse CLI arguments into structured format
     let cli = Cli::parse();
     
     // Initialize CTRL-C handler with runtime state tracker
-    let runtime_info = ctrlc_init();
+    let runtime_info = ctrlc_init()?;
     
     // Configuration loading strategy:
     // - Load from JSON when --read-json flag present
     // - Otherwise validate and convert CLI arguments
     let info = if cli.read_json {
-        read_json()
+        read_json().context("Read json failed.")?
     } else {
         check_cli(&cli);
-        cli_to_info(cli)
+        cli_to_info(cli).context("Read command failed.")?
     };
 
     // Windows console UTF-8 encoding enforcement
@@ -60,4 +63,5 @@ fn main() {
     // Output validated configuration and start monitoring
     info.output_info();
     normal_loop(info, runtime_info);
+    Ok(())
 }

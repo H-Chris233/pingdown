@@ -1,48 +1,89 @@
+
 use pingdown::JsonInfo;
 use crate::libs::ping::check_status;
-use crate::libs::io::{sleep, error, shutdown};
+use crate::libs::io::{sleep, shutdown};
 use crate::libs::output_file::{RuntimeInfo, Info, add_one};
 use std::sync::{Arc, Mutex};
+use anyhow::{Context, Result};
+use log::{debug, error, info, warn};
 
 /// Continuously monitors connectivity in regular intervals
-pub fn normal_loop(info: JsonInfo, runtime_info: Arc<Mutex<RuntimeInfo>>) {
+pub fn normal_loop(info: JsonInfo, runtime_info: Arc<Mutex<RuntimeInfo>>) -> Result<()> {
     let vec_address = &info.vec_address;
     let secs = info.secs_for_normal_loop;
-    println!("Started {}sec loop...", secs);
+    info!("Started {} sec normal loop...", secs);
+    
     for i in 0.. {
-        let status = check_status(vec_address, &info.strict, &runtime_info);
-        if !status {
-            emergency_loop(&info, &runtime_info);
-            continue;
+        match check_status(vec_address, &info.strict, &runtime_info) {
+            Ok(status) => {
+                if !status {
+                    debug!("Connection lost, entering emergency loop");
+                    if let Err(e) = emergency_loop(&info, &runtime_info) {
+                        error!("Emergency loop failed: {}", e);
+                    }
+                    continue;
+                }
+            },
+            Err(e) => {
+                error!("Connection check failed: {}", e);
+                debug!("Entering emergency loop due to connection error");
+                if let Err(e) = emergency_loop(&info, &runtime_info) {
+                    error!("Emergency loop failed: {}", e);
+                }
+                continue;
+            }
         }
-        add_one(&runtime_info, Info::NormalLoopTimes);
-        if i >= 1 {println!("Normal looped for {} times...", i);}
-        println!("{} secs left for the next normal loop...", secs);
+
+        add_one(&runtime_info, Info::NormalLoopTimes)?;
+        if i >= 1 {
+            info!("Normal looped for {} times...", i + 1);
+        }
+        debug!("{} secs left for the next normal loop...", secs);
         sleep(secs);
     }
+    
+    Ok(())
 }
 
-/// Critical failure handler activated when connectivity is lost. Implements retry mechanism and system shutdown protocol.
-fn emergency_loop(info: &JsonInfo, runtime_info: &Arc<Mutex<RuntimeInfo>>) {
+/// Critical failure handler activated when connectivity is lost
+fn emergency_loop(info: &JsonInfo, runtime_info: &Arc<Mutex<RuntimeInfo>>) -> Result<()> {
     let vec_address = &info.vec_address;
     let secs = info.secs_for_emergency_loop;
-    let mut time_left = info.times_for_emergency_loop;
-    println!("Warning!!! Connection lost!!!!");
-    println!("Checking connection every {} seconds!!", secs);
+    let max_retries = info.times_for_emergency_loop;
+    let mut retries_left = max_retries;
+    
+    warn!("Connection lost - Entering emergency loop");
+    info!("Emergency loop configured for {} retries every {} seconds", max_retries, secs);
+
     loop {
-        println!("{} tries remaining...", time_left);
-        let status = check_status(vec_address, &info.strict, runtime_info);
-        if status {
-            break;
-        } else if time_left == 0 {
-            shutdown();
-            error("system shutdown failed - check permissions"); // System still running indicates permission issues
+        info!("{} retries remaining...", retries_left);
+        
+        match check_status(vec_address, &info.strict, runtime_info) {
+            Ok(true) => {
+                info!("Connection restored after {} retries!", max_retries - retries_left);
+                return Ok(());
+            },
+            Ok(false) => {
+                retries_left -= 1;
+                if retries_left == 0 {
+                    warn!("Emergency loop shutdown triggered - no connection");
+                    match shutdown() {
+                        Ok(_) => info!("System is shutting down..."),
+                        Err(e) => {
+                            error!("System shutdown failed: {}", e);
+                            return Err(e).context("Emergency shutdown failed");
+                        }
+                    }
+                }
+            },
+            Err(e) => {
+                error!("Connection check error: {}", e);
+                retries_left -= 1;
+            }
         }
-        println!("{} secs left for the next check...", secs);
-        add_one(runtime_info, Info::EmergencyLoopTimes);
-        time_left -= 1;
+        
+        add_one(runtime_info, Info::EmergencyLoopTimes)?;
+        debug!("{} secs left for the next emergency check...", secs);
         sleep(secs);
     }
-    println!("Reconnected!!!");
-    println!("Exiting {}sec emergency loop...", secs);
 }
