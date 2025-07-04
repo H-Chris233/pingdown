@@ -11,7 +11,7 @@
 //! - [`RuntimeInfo`] tracking runtime state
 //! - [`Info`] storing monitoring parameters
 
-#[allow(unused_imports)]
+#![allow(unused_imports)]
 
 mod libs;
 
@@ -52,7 +52,7 @@ fn main() -> Result<()> {
     let info = if cli.read_json {
         read_json().context("Read json failed.")?
     } else {
-        check_cli(&cli);
+        check_cli(&cli)?;
         cli_to_info(cli).context("Read command failed.")?
     };
 
@@ -62,6 +62,6 @@ fn main() -> Result<()> {
 
     // Output validated configuration and start monitoring
     info.output_info();
-    normal_loop(info, runtime_info);
+    normal_loop(info, runtime_info)?;
     Ok(())
 }

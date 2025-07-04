@@ -50,6 +50,8 @@ pub fn ctrlc_init() -> Result<Arc<Mutex<RuntimeInfo>>> {
                             error!("Failed to write runtime info: {}", e);
                         }
                         
+                        output.output();
+                        
                         // Graceful exit after writing file
                         std::process::exit(0);
                     }
