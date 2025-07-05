@@ -47,13 +47,8 @@ pub fn shutdown() -> Result<()> {
     ];
 
     for &(cmd, msg) in &commands {
-        match run_command(cmd, msg) {
-            Ok(_) => return Ok(()),
-            Err(e) => {
-                error!("Failed to execute command '{}': {}", cmd, e);
-                sleep(7);
-            }
-        }
+        run_command(cmd, msg)?;
+        sleep(7);
     }
 
     Err(anyhow!("All shutdown commands failed"))

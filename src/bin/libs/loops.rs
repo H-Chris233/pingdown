@@ -18,19 +18,15 @@ pub fn normal_loop(info: JsonInfo, runtime_info: Arc<Mutex<RuntimeInfo>>) -> Res
             Ok(status) => {
                 if !status {
                     debug!("Connection lost, entering emergency loop");
-                    if let Err(e) = emergency_loop(&info, &runtime_info) {
-                        error!("Emergency loop failed: {}", e);
-                    }
-                    continue;
+                    emergency_loop(&info, &runtime_info).context("Emergency loop failed")?;
+                    continue
                 }
             },
             Err(e) => {
                 error!("Connection check failed: {}", e);
                 debug!("Entering emergency loop due to connection error");
-                if let Err(e) = emergency_loop(&info, &runtime_info) {
-                    error!("Emergency loop failed: {}", e);
-                }
-                continue;
+                emergency_loop(&info, &runtime_info).context("Emergency loop failed after connection error")?;
+                continue
             }
         }
 
