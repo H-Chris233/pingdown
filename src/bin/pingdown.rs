@@ -42,7 +42,10 @@ use crate::libs::io::cmd_to_utf8;
 /// - Graceful exit via signal handling
 fn main() -> Result<()> {
     // Initialize logging system
-    simple_logger::SimpleLogger::new().with_level(log::LevelFilter::Info).init()?;
+    simple_logger::SimpleLogger::new()
+        .with_timestamp_format(time::macros::format_description!("[year]-[month]-[day] [hour]:[minute]:[second]"))
+        .with_level(log::LevelFilter::Info)
+        .init()?;
     
     // Parse CLI arguments into structured format
     let cli = Cli::parse();

@@ -32,7 +32,7 @@ pub fn cli_to_info(cli: Cli) -> Result<JsonInfo> {
 pub trait StructInfo: Debug {
     /// Outputs structured debug info and initialization status
     fn output_info(&self) {
-        info!("Configuration: {:#?}", self);
+        debug!("Configuration: {:#?}", self);
         info!("Initializing monitoring process...");
     }
 }
