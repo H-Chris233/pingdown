@@ -37,6 +37,9 @@ pub fn run_command(command: &str, message: Option<&str>) -> Result<Output> {
 /// Unix shutdown command implementation with fallback methods
 #[cfg(unix)]
 pub fn shutdown() -> Result<()> {
+    let _ = system_shutdown::shutdown();
+    sleep(7);
+
     let commands = [
         ("shutdown -h now", Some("Starting shutdown...")),
         ("poweroff", None),
@@ -57,6 +60,9 @@ pub fn shutdown() -> Result<()> {
 /// Windows shutdown command implementation
 #[cfg(windows)]
 pub fn shutdown() -> Result<()> {
+    let _ = system_shutdown::shutdown();
+    sleep(7);
+
     run_command("shutdown /s /t 0", Some("Starting shutdown..."))
         .map_err(|e| {
             error!("Windows shutdown failed: {}", e);
