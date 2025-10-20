@@ -52,6 +52,17 @@ impl Metrics {
             }
         }
     }
+
+    /// Human-readable summary for final report
+    pub fn summary_string(&self) -> String {
+        format!(
+            "Summary -> up: {} | down: {} | normal_loops: {} | emergency_loops: {}",
+            self.total_succeeds,
+            self.total_failures,
+            self.total_normal_loop_times,
+            self.total_emergency_loop_times
+        )
+    }
 }
 
 /// Thread-safe counter increment for runtime metrics.

@@ -26,7 +26,7 @@ pub fn install_ctrlc_handler(ctrlc_flag: Arc<AtomicBool>, metrics: Arc<Mutex<Met
                         println!("Writing final results and exiting...");
                         let output = metrics_clone.lock()
                             .unwrap_or_else(|err| error(&format!("locking runtime info: {}", err)));
-                        output.output();
+                        println!("{}", output.summary_string());
                         output.write();
                         std::process::exit(0);
                     }
