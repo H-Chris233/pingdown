@@ -3,7 +3,7 @@ use std::sync::atomic::AtomicBool;
 use clap::Parser;
 
 use crate::cli::{Cli, validate_cli};
-use crate::config::{Config, read_json, from_cli, OutputInfo};
+use crate::config::{Config, read_json, read_json_with_path, from_cli, OutputInfo};
 use crate::monitor::normal_loop;
 use crate::runtime::Metrics;
 use crate::signals::install_ctrlc_handler;
@@ -37,7 +37,9 @@ impl<S: System + Send + Sync + 'static> App<S> {
         install_ctrlc_handler(shutdown_flag.clone(), metrics.clone());
 
         // 3) Resolve configuration from JSON or CLI
-        let config: Config = if cli.read_json {
+        let config: Config = if let Some(path) = &cli.config {
+            read_json_with_path(Some(path))
+        } else if cli.read_json {
             read_json()
         } else {
             validate_cli(&cli);
