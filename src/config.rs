@@ -1,134 +1,342 @@
-use serde::{Deserialize, Serialize};
+use colored::Colorize;
+use regex::Regex;
+use serde::Deserialize;
+use std::env;
 use std::fmt::Debug;
 use std::fs;
-use std::path::Path;
-use colored::Colorize;
+use std::io;
+use std::num::NonZeroU32;
+use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use crate::cli::Cli;
-use crate::system::error;
 
-/// Configuration parameter structure supporting JSON serialization/deserialization
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Config {
-    #[serde(alias = "address")]  // Alias mapping: JSON field -> struct field
-    pub vec_address: Vec<String>,
-    #[serde(default)]  // Allow missing field, use bool default (false)
+pub const ENV_CONFIG_PATH: &str = "PINGDOWN_CONFIG";
+pub const DEFAULT_CONFIG_PATH: &str = "./config.json";
+pub const DEFAULT_NORMAL_SECS: u64 = 60;
+pub const DEFAULT_EMERGENCY_SECS: u64 = 20;
+pub const DEFAULT_EMERGENCY_RETRIES: u32 = 3;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MonitorConfig {
+    pub targets: Vec<String>,
     pub strict: bool,
-    #[serde(alias = "secs-for-normal-loop", default = "default_60")]    // Alias | Default: 60
-    pub secs_for_normal_loop: u64,
-    #[serde(alias = "secs-for-emergency-loop", default = "default_20")]  // Alias | Default: 20
-    pub secs_for_emergency_loop: u64,
-    #[serde(alias = "times-for-emergency-loop", default = "default_3")] // Alias | Default: 3
-    pub times_for_emergency_loop: u64,
-
-    // UX/Output flags (also configurable via JSON for convenience)
-    #[serde(default)]
+    pub normal_interval: Duration,
+    pub emergency_interval: Duration,
+    pub emergency_retries: NonZeroU32,
     pub quiet: bool,
-    #[serde(default)]
     pub status_only: bool,
-    #[serde(default)]
     pub progress: bool,
-    #[serde(default = "default_verbose")] // clap -v count style (0,1,2,...)
     pub verbose: u8,
 }
 
-/// Serde default functions (standalone for function pointer requirements, easier maintenance)
-fn default_60() -> u64 {60}  // Normal loop interval
-fn default_20() -> u64 {20}  // Emergency loop interval
-fn default_3() -> u64 {3}    // Emergency loop count
-fn default_verbose() -> u8 {0}
+impl MonitorConfig {
+    pub fn normal_interval_secs(&self) -> u64 {
+        self.normal_interval.as_secs()
+    }
 
-/// Loads configuration from JSON file
-///
-/// # Path
-/// - Path may be provided; defaults to "./config.json"
-///
-/// # Error Handling
-/// - File read failure: Terminates process via error()
-/// - JSON parse failure: Terminates process via error()
-pub fn read_json_with_path<P: AsRef<Path>>(path: Option<P>) -> Config {
-    let path_buf;
-    let path_ref: &Path = if let Some(p) = path {
-        path_buf = p.as_ref().to_path_buf();
-        &path_buf
-    } else {
-        Path::new("./config.json")
-    };
+    pub fn emergency_interval_secs(&self) -> u64 {
+        self.emergency_interval.as_secs()
+    }
 
-    let json_str = match fs::read_to_string(path_ref) {
-        Ok(json_str) => json_str,
-        Err(err) => error(&format!("reading JSON file.\n{}", err)),
-    };
-    let config: Config = match serde_json::from_str(&json_str) {
-        Ok(json_info) => json_info,
-        Err(err) => error(&format!("parsing JSON file.\n{}", err)),
-    };
-    config
-}
-
-/// Backwards compatible function for legacy callers
-pub fn read_json() -> Config { read_json_with_path::<&Path>(None) }
-
-/// CLI arguments to config struct converter
-///
-/// # Conversion Logic
-/// - Numeric fields: Safely converted via convert_num
-/// - Address list: Direct mapping
-/// - Strict mode: Direct mapping
-pub fn from_cli(cli: Cli) -> Config {
-    Config {
-        secs_for_normal_loop: convert_num(&cli.secs_for_normal_loop),
-        secs_for_emergency_loop: convert_num(&cli.secs_for_emergency_loop),
-        times_for_emergency_loop: convert_num(&cli.times_for_emergency_loop),
-        vec_address: cli.vec_address,
-        strict: cli.strict,
-        quiet: cli.quiet,
-        status_only: cli.status_only,
-        progress: cli.progress,
-        verbose: cli.verbose,
+    pub fn emergency_retry_attempts(&self) -> u32 {
+        self.emergency_retries.get()
     }
 }
 
-/// Numeric parameter validator/converter
-///
-/// # Functionality
-/// 1. Converts string to u64 integer
-/// 2. Validates non-zero positive integer
-///
-/// # Error Handling
-/// - Parse failure: Triggers error() with invalid input
-/// - Zero value: Triggers error() requiring positive integer
-pub fn convert_num(num: &str) -> u64 {
-    let num: u64 = match num.parse() {
-        Ok(num) => num,
-        Err(_) => error(&format!("Invalid numeric input[in function convert_num]\nExpected positive integer, found: {}", num)),
-    };
-    if num == 0 {
-        error(&format!("Zero value detected[in function convert_num]\nPositive integer required, found: {}", num));
-    }
-    num
+pub trait ConfigLoader {
+    fn load(&self, path: &Path) -> Result<FileConfig, ConfigError>;
 }
 
-/// Configuration debugging interface
-///
-/// # Default Implementation
-/// - Prints pretty-printed Debug output
-/// - Displays initialization status
+#[derive(Default)]
+pub struct JsonConfigLoader;
+
+impl ConfigLoader for JsonConfigLoader {
+    fn load(&self, path: &Path) -> Result<FileConfig, ConfigError> {
+        let contents = fs::read_to_string(path).map_err(|source| ConfigError::io(path, source))?;
+        serde_json::from_str(&contents).map_err(|err| ConfigError::parse(path, err))
+    }
+}
+
+pub fn build_monitor_config(cli: &Cli) -> Result<MonitorConfig, ConfigError> {
+    build_monitor_config_with_loader(cli, &JsonConfigLoader::default())
+}
+
+pub fn build_monitor_config_with_loader(
+    cli: &Cli,
+    loader: &dyn ConfigLoader,
+) -> Result<MonitorConfig, ConfigError> {
+    let mut builder = MonitorConfigBuilder::default();
+
+    if let Some(path) = resolve_config_path(cli) {
+        let config = loader.load(&path)?;
+        builder.merge_file(config, &path);
+    }
+
+    builder.merge_cli(cli);
+    builder.build()
+}
+
+fn resolve_config_path(cli: &Cli) -> Option<PathBuf> {
+    if let Some(path) = &cli.config {
+        return Some(path.clone());
+    }
+
+    if cli.read_json {
+        return Some(PathBuf::from(DEFAULT_CONFIG_PATH));
+    }
+
+    if let Ok(value) = env::var(ENV_CONFIG_PATH) {
+        let trimmed = value.trim();
+        if !trimmed.is_empty() {
+            return Some(PathBuf::from(trimmed));
+        }
+    }
+
+    None
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
+struct FileConfig {
+    #[serde(alias = "address", alias = "addresses")]
+    targets: Option<Vec<String>>,
+    strict: Option<bool>,
+    #[serde(alias = "secs-for-normal-loop")]
+    normal_secs: Option<u64>,
+    #[serde(alias = "secs-for-emergency-loop")]
+    emergency_secs: Option<u64>,
+    #[serde(alias = "times-for-emergency-loop")]
+    emergency_retries: Option<u32>,
+    quiet: Option<bool>,
+    #[serde(alias = "status_only", alias = "status-only")]
+    status_only: Option<bool>,
+    progress: Option<bool>,
+    verbose: Option<u8>,
+}
+
+#[derive(Debug, Default)]
+struct MonitorConfigBuilder {
+    targets: Option<FieldValue<Vec<String>>>,
+    strict: Option<FieldValue<bool>>,
+    normal_secs: Option<FieldValue<u64>>,
+    emergency_secs: Option<FieldValue<u64>>,
+    emergency_retries: Option<FieldValue<u32>>,
+    quiet: Option<FieldValue<bool>>,
+    status_only: Option<FieldValue<bool>>,
+    progress: Option<FieldValue<bool>>,
+    verbose: Option<FieldValue<u8>>,
+}
+
+impl MonitorConfigBuilder {
+    fn merge_file(&mut self, cfg: FileConfig, path: &Path) {
+        let prefix = |key: &str| format!("{}:{}", path.display(), key);
+
+        if let Some(targets) = cfg.targets {
+            self.targets = Some(FieldValue::new(targets, prefix("address")));
+        }
+        if let Some(strict) = cfg.strict {
+            self.strict = Some(FieldValue::new(strict, prefix("strict")));
+        }
+        if let Some(value) = cfg.normal_secs {
+            self.normal_secs = Some(FieldValue::new(value, prefix("secs-for-normal-loop")));
+        }
+        if let Some(value) = cfg.emergency_secs {
+            self.emergency_secs = Some(FieldValue::new(value, prefix("secs-for-emergency-loop")));
+        }
+        if let Some(value) = cfg.emergency_retries {
+            self.emergency_retries = Some(FieldValue::new(value, prefix("times-for-emergency-loop")));
+        }
+        if let Some(value) = cfg.quiet {
+            self.quiet = Some(FieldValue::new(value, prefix("quiet")));
+        }
+        if let Some(value) = cfg.status_only {
+            self.status_only = Some(FieldValue::new(value, prefix("status-only")));
+        }
+        if let Some(value) = cfg.progress {
+            self.progress = Some(FieldValue::new(value, prefix("progress")));
+        }
+        if let Some(value) = cfg.verbose {
+            self.verbose = Some(FieldValue::new(value, prefix("verbose")));
+        }
+    }
+
+    fn merge_cli(&mut self, cli: &Cli) {
+        if !cli.targets.is_empty() {
+            self.targets = Some(FieldValue::new(cli.targets.clone(), "cli.targets".to_string()));
+        }
+        if cli.strict {
+            self.strict = Some(FieldValue::new(true, "cli --strict/-s".to_string()));
+        }
+        if let Some(value) = cli.normal_interval {
+            self.normal_secs = Some(FieldValue::new(value, "cli --normal/-n".to_string()));
+        }
+        if let Some(value) = cli.emergency_interval {
+            self.emergency_secs = Some(FieldValue::new(value, "cli --emergency/-e".to_string()));
+        }
+        if let Some(value) = cli.emergency_retries {
+            self.emergency_retries = Some(FieldValue::new(value, "cli --tries/-t".to_string()));
+        }
+        if cli.quiet {
+            self.quiet = Some(FieldValue::new(true, "cli --quiet/-q".to_string()));
+        }
+        if cli.status_only {
+            self.status_only = Some(FieldValue::new(true, "cli --status-only".to_string()));
+        }
+        if cli.progress {
+            self.progress = Some(FieldValue::new(true, "cli --progress".to_string()));
+        }
+        if cli.verbose > 0 {
+            self.verbose = Some(FieldValue::new(cli.verbose, "cli --verbose/-v".to_string()));
+        }
+    }
+
+    fn build(self) -> Result<MonitorConfig, ConfigError> {
+        let FieldValue { value: targets, path: targets_path } = self.targets.ok_or_else(|| {
+            ConfigError::validation(
+                "cli.targets|config.address",
+                "at least one target must be provided via CLI or configuration file",
+            )
+        })?;
+
+        if targets.is_empty() {
+            return Err(ConfigError::validation(
+                targets_path,
+                "the targets list cannot be empty",
+            ));
+        }
+
+        let re_address = Regex::new(r"^(?:(?:https?|ftp|ftps)://)?(?:[^\s:@/]+(?::[^\s:@/]*)?@)?(?:(?:www\.)?(?:[a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.[a-zA-Z]{2,}|(?:\d{1,3}\.){3}\d{1,3}|\[[a-fA-F0-9:]+\])(?::\d+)?(?:/[^\s?#]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?$")
+            .expect("valid address regex");
+
+        for (idx, target) in targets.iter().enumerate() {
+            if !re_address.is_match(target) {
+                return Err(ConfigError::validation(
+                    format!("{}[{}]", targets_path, idx),
+                    format!("'{}' is not a valid host, IP, or URL", target),
+                ));
+            }
+        }
+
+        let (normal_secs, normal_path) = match self.normal_secs {
+            Some(FieldValue { value, path }) => (value, Some(path)),
+            None => (DEFAULT_NORMAL_SECS, None),
+        };
+
+        if normal_secs == 0 {
+            return Err(ConfigError::validation(
+                normal_path.unwrap_or_else(|| "defaults.normal_interval".to_string()),
+                "normal interval must be greater than zero seconds",
+            ));
+        }
+
+        let (emergency_secs, emergency_path) = match self.emergency_secs {
+            Some(FieldValue { value, path }) => (value, Some(path)),
+            None => (DEFAULT_EMERGENCY_SECS, None),
+        };
+
+        if emergency_secs == 0 {
+            return Err(ConfigError::validation(
+                emergency_path.unwrap_or_else(|| "defaults.emergency_interval".to_string()),
+                "emergency interval must be greater than zero seconds",
+            ));
+        }
+
+        let (retries_value, retries_path) = match self.emergency_retries {
+            Some(FieldValue { value, path }) => (value, Some(path)),
+            None => (DEFAULT_EMERGENCY_RETRIES, None),
+        };
+
+        let emergency_retries = NonZeroU32::new(retries_value).ok_or_else(|| {
+            ConfigError::validation(
+                retries_path.unwrap_or_else(|| "defaults.emergency_retries".to_string()),
+                "emergency retry attempts must be at least 1",
+            )
+        })?;
+
+        let strict = self.strict.map(|FieldValue { value, .. }| value).unwrap_or(false);
+        let quiet = self.quiet.map(|FieldValue { value, .. }| value).unwrap_or(false);
+        let status_only = self.status_only.map(|FieldValue { value, .. }| value).unwrap_or(false);
+        let progress = self.progress.map(|FieldValue { value, .. }| value).unwrap_or(false);
+        let verbose = self.verbose.map(|FieldValue { value, .. }| value).unwrap_or(0);
+
+        Ok(MonitorConfig {
+            targets,
+            strict,
+            normal_interval: Duration::from_secs(normal_secs),
+            emergency_interval: Duration::from_secs(emergency_secs),
+            emergency_retries,
+            quiet,
+            status_only,
+            progress,
+            verbose,
+        })
+    }
+}
+
+#[derive(Debug, Clone)]
+struct FieldValue<T> {
+    value: T,
+    path: String,
+}
+
+impl<T> FieldValue<T> {
+    fn new(value: T, path: String) -> Self {
+        Self { value, path }
+    }
+}
+
+#[derive(Debug)]
+pub enum ConfigError {
+    Io { path: PathBuf, source: io::Error },
+    Parse { path: PathBuf, message: String },
+    Validation { field_path: String, message: String },
+}
+
+impl ConfigError {
+    fn io(path: &Path, source: io::Error) -> Self {
+        Self::Io { path: path.to_path_buf(), source }
+    }
+
+    fn parse(path: &Path, err: serde_json::Error) -> Self {
+        Self::Parse { path: path.to_path_buf(), message: err.to_string() }
+    }
+
+    fn validation(path: impl Into<String>, message: impl Into<String>) -> Self {
+        Self::Validation { field_path: path.into(), message: message.into() }
+    }
+}
+
+impl std::fmt::Display for ConfigError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ConfigError::Io { path, source } => write!(f, "failed to read configuration at '{}': {}", path.display(), source),
+            ConfigError::Parse { path, message } => write!(f, "failed to parse configuration at '{}': {}", path.display(), message),
+            ConfigError::Validation { field_path, message } => write!(f, "invalid configuration for '{}': {}", field_path, message),
+        }
+    }
+}
+
+impl std::error::Error for ConfigError {}
+
 pub trait OutputInfo: Debug {
-    /// Outputs structured debug info and initialization status
     fn output_info(&self) {
         println!("{:#?}", self);
         println!("Initializing monitoring process...");
     }
 }
 
-impl OutputInfo for Config {
+impl OutputInfo for MonitorConfig {
     fn output_info(&self) {
         println!("{} Effective configuration", "[CONFIG]".bold());
-        println!("  targets     : {}", self.vec_address.join(", "));
+        println!("  targets     : {}", self.targets.join(", "));
         println!("  strict      : {}", self.strict);
-        println!("  normal      : {}s", self.secs_for_normal_loop);
-        println!("  emergency   : {}s x{}", self.secs_for_emergency_loop, self.times_for_emergency_loop);
+        println!("  normal      : {}s", self.normal_interval_secs());
+        println!(
+            "  emergency   : {}s x{}",
+            self.emergency_interval_secs(),
+            self.emergency_retry_attempts()
+        );
         println!("  verbose     : {}", self.verbose);
         println!("  quiet       : {}", self.quiet);
         println!("  status-only : {}", self.status_only);

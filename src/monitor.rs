@@ -4,14 +4,14 @@ use std::thread;
 use std::time::Duration;
 use colored::Colorize;
 
-use crate::config::Config;
+use crate::config::MonitorConfig;
 use crate::ping::check_status;
 use crate::runtime::{add_one, MetricEvent, Metrics};
 use crate::system::{error, System};
 
 /// Continuously monitors connectivity in regular intervals
-pub fn normal_loop<S: System>(info: Config, metrics: Arc<Mutex<Metrics>>, system: &S) {
-    let secs = info.secs_for_normal_loop;
+pub fn normal_loop<S: System>(info: MonitorConfig, metrics: Arc<Mutex<Metrics>>, system: &S) {
+    let secs = info.normal_interval_secs();
     println!("{} {}sec loop...", "[NORMAL]".bold().green(), secs);
     for i in 0.. {
         let (status, succeeds, failures) = check_status(&info, &metrics, system);
@@ -36,9 +36,9 @@ pub fn normal_loop<S: System>(info: Config, metrics: Arc<Mutex<Metrics>>, system
 }
 
 /// Critical failure handler activated when connectivity is lost. Implements retry mechanism and system shutdown protocol.
-fn emergency_loop<S: System>(info: &Config, metrics: &Arc<Mutex<Metrics>>, system: &S) {
-    let secs = info.secs_for_emergency_loop;
-    let mut time_left = info.times_for_emergency_loop;
+fn emergency_loop<S: System>(info: &MonitorConfig, metrics: &Arc<Mutex<Metrics>>, system: &S) {
+    let secs = info.emergency_interval_secs();
+    let mut time_left = info.emergency_retry_attempts();
     println!(
         "{} Connection lost. Entering emergency loop ({}s interval, {} tries).",
         "[EMERGENCY]".bold().red(),
@@ -65,7 +65,9 @@ fn emergency_loop<S: System>(info: &Config, metrics: &Arc<Mutex<Metrics>>, syste
             secs
         );
         add_one(metrics, MetricEvent::EmergencyLoopTimes);
-        time_left -= 1;
+        if time_left > 0 {
+            time_left -= 1;
+        }
         sleep_with_progress(secs, info.progress, "[EMERGENCY]");
     }
     println!("{} Exiting {}sec emergency loop...", "[EMERGENCY]".bold().green(), secs);
@@ -94,6 +96,6 @@ fn sleep_with_progress(secs: u64, progress: bool, prefix: &str) {
     let _ = io::stdout().flush();
 }
 
-pub fn test_emergency_loop<S: System>(info: &Config, metrics: &Arc<Mutex<Metrics>>, system: &S) {
+pub fn test_emergency_loop<S: System>(info: &MonitorConfig, metrics: &Arc<Mutex<Metrics>>, system: &S) {
     emergency_loop(info, metrics, system);
 }

@@ -74,12 +74,14 @@ pingdown --status-only --progress 1.1.1.1
 
 ### Priority Rules
 ```bash
-# With --config (JSON has priority)
-config.json > CLI arguments > default values
+# When a config file is provided (via --config, --read-json, or PINGDOWN_CONFIG)
+CLI arguments > config file > default values
 
-# Without --config (CLI-only mode)
+# CLI-only mode
 CLI arguments > default values
 ```
+
+`PINGDOWN_CONFIG` can be used to point at a configuration file when `--config` is not supplied. CLI flags always take precedence over file values.
 
 ### JSON Specification
 ```json
