@@ -26,23 +26,12 @@ jobs:
         uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
-          targets: x86_64-unknown-linux-gnu  # 可选交叉编译目标
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Basic checks
-        run: cargo check --locked
-        if: matrix.os != 'windows-latest'
-
-      - name: Windows setup
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          # 添加管理员权限检查
-          if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-            Write-Error "This step requires Administrator privileges"
-            exit 1
-          }
-          choco install -y llvm --confirm --no-progress
-          cargo check --locked
+      - name: Build
+        run: cargo b
+      
+      - name: Tests
+        run: cargo test --all-targets -- --nocapture

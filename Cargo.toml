@@ -2,7 +2,7 @@
 name = "pingdown"
 version = "1.4.8"
 authors = ["Chris233 h-chris233@outlook.com"]
-edition = "2024"
+edition = "2021"
 readme = "README.md"
 repository = "https://github.com/H-Chris233/pingdown/"
 default-run = "pingdown"
@@ -16,6 +16,11 @@ ctrlc = "3.4.5"
 regex = "1.11.1"
 serde = { version = "1.0.218", features = ["derive"] }
 serde_json = "1.0.139"
+
+[dev-dependencies]
+assert_cmd = "2.0.16"
+predicates = "3.1.0"
+tempfile = "3.13.0"
 
 [profile.release]
 opt-level = "z"

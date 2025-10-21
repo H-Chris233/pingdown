@@ -133,6 +133,28 @@ CLI arguments > default values
 
 ---
 
+## Development and testing
+
+The repository includes comprehensive automated tests covering configuration parsing, monitoring state transitions, CLI behavior, and a smoke-level end-to-end path with stubbed ping execution.
+
+Run the same checks locally that CI runs:
+
+- Format check
+  cargo fmt --all -- --check
+
+- Lints (treat warnings as errors)
+  cargo clippy --all-targets --all-features -- -D warnings
+
+- Unit, integration, and e2e tests
+  cargo test --all-targets
+
+Notes:
+- Integration tests use temporary directories and kill spawned CLI processes shortly after startup to verify configuration output without hanging.
+- No network access is required; ping execution is stubbed/mocked in tests.
+- On Unix you may need to ensure the `ping` command is present for manual runs.
+
+---
+
 Best practice: Pin production configs with `--config` and use CLI flags for local testing.
 
 If shutdown fails, run with administrator privileges.

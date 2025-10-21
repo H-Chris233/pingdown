@@ -93,3 +93,7 @@ fn sleep_with_progress(secs: u64, progress: bool, prefix: &str) {
     print!("\r{} Done.            \n", prefix);
     let _ = io::stdout().flush();
 }
+
+pub fn test_emergency_loop<S: System>(info: &Config, metrics: &Arc<Mutex<Metrics>>, system: &S) {
+    emergency_loop(info, metrics, system);
+}
