@@ -1,8 +1,7 @@
 use clap::{ArgAction, Parser, ValueHint};
-use regex::Regex;
-use crate::system::error;
+use std::path::PathBuf;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[command(
     name = "pingdown",
     author = "H-Chris233",
@@ -16,33 +15,32 @@ use crate::system::error;
 pub struct Cli {
     /// Target IP address(es) or domain name(s) to check
     #[arg(value_name = "TARGETS", value_hint = ValueHint::Hostname)]
-    pub vec_address: Vec<String>,
+    pub targets: Vec<String>,
 
     /// Enable strict verification mode (all targets must succeed).
     /// By default, the check passes if any target succeeds.
     #[arg(short, long)]
     pub strict: bool,
 
-    /// Read configuration from a JSON file (same format as README). When provided,
-    /// CLI addresses and numeric options are ignored and values from the file are used.
+    /// Read configuration from a JSON file (same format as README).
     #[arg(short = 'c', long = "config", value_name = "FILE")]
-    pub config: Option<String>,
+    pub config: Option<PathBuf>,
 
     /// Deprecated: read ./config.json from current directory. Use --config instead.
-    #[arg(short, long, hide = false)]
+    #[arg(short = 'r', long = "read-json", hide = false)]
     pub read_json: bool,
 
-    /// Interval (in seconds) between regular checks
-    #[arg(short = 'n', long = "normal", default_value = "60", value_name = "SECS")]
-    pub secs_for_normal_loop: String,
+    /// Interval (in seconds) between regular checks (default: 60)
+    #[arg(short = 'n', long = "normal", value_name = "SECS")]
+    pub normal_interval: Option<u64>,
 
-    /// Interval (in seconds) between emergency retries
-    #[arg(short = 'e', long = "emergency", default_value = "20", value_name = "SECS")]
-    pub secs_for_emergency_loop: String,
+    /// Interval (in seconds) between emergency retries (default: 20)
+    #[arg(short = 'e', long = "emergency", value_name = "SECS")]
+    pub emergency_interval: Option<u64>,
 
-    /// Maximum number of emergency retry attempts before shutdown
-    #[arg(short = 't', long = "tries", default_value = "3", value_name = "NUM")]
-    pub times_for_emergency_loop: String,
+    /// Maximum number of emergency retry attempts before shutdown (default: 3)
+    #[arg(short = 't', long = "tries", value_name = "NUM")]
+    pub emergency_retries: Option<u32>,
 
     /// Increase output verbosity (-v, -vv). Conflicts with --quiet and --status-only
     #[arg(short = 'v', long = "verbose", action = ArgAction::Count, conflicts_with_all = ["quiet", "status_only"])]
@@ -59,28 +57,4 @@ pub struct Cli {
     /// Show a progress spinner while waiting between checks
     #[arg(long = "progress", default_value_t = false)]
     pub progress: bool,
-}
-
-/// Validates CLI arguments:
-/// - Requires at least one address unless using --config/-r
-/// - Checks IP/URL format compliance
-/// - Terminates on errors with alerts
-pub fn validate_cli(cli: &Cli) {
-    let re_address = match Regex::new(r"^(?:(?:https?|ftp|ftps)://)?(?:[^\s:@/]+(?::[^\s:@/]*)?@)?(?:(?:www\.)?(?:[a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.[a-zA-Z]{2,}|(?:\d{1,3}\.){3}\d{1,3}|\[[a-fA-F0-9:]+\])(?::\d+)?(?:/[^\s?#]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?$") {
-        Ok(re_ip) => re_ip,
-        Err(err) => error(&format!("Regex compile failed: {} [validate_cli]", err)),
-    };
-
-    // If a config file is provided or legacy -r is used, skip positional validation
-    if cli.config.is_none() && !cli.read_json {
-        if cli.vec_address.is_empty() {
-            println!("\nPlease provide at least one IP/website\nUse -h for help");
-            error("No target addresses detected");
-        }
-        for ip in &cli.vec_address {
-            if !re_address.is_match(ip) {
-                error(&format!("Invalid address [validate_cli]\n{}: Verify format", ip));
-            }
-        }
-    }
 }

@@ -1,20 +1,22 @@
 mod common;
 use common::StubSystem;
 
+use std::num::NonZeroU32;
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
-use pingdown::config::Config;
 use pingdown::monitor::test_emergency_loop;
 use pingdown::ping::check_status;
 use pingdown::runtime::Metrics;
+use pingdown::MonitorConfig;
 
-fn cfg(addrs: Vec<&str>, strict: bool, tries: u64) -> Config {
-    Config {
-        vec_address: addrs.into_iter().map(|s| s.to_string()).collect(),
+fn cfg(addrs: Vec<&str>, strict: bool, tries: u32) -> MonitorConfig {
+    MonitorConfig {
+        targets: addrs.into_iter().map(|s| s.to_string()).collect(),
         strict,
-        secs_for_normal_loop: 0,
-        secs_for_emergency_loop: 0,
-        times_for_emergency_loop: tries,
+        normal_interval: Duration::from_secs(1),
+        emergency_interval: Duration::from_secs(1),
+        emergency_retries: NonZeroU32::new(tries).unwrap(),
         quiet: true,
         status_only: true,
         progress: false,

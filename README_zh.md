@@ -74,12 +74,14 @@ pingdown --status-only --progress 1.1.1.1
 
 ### 优先级规则
 ```bash
-# 使用 --config（配置优先）
-config.json > 命令行参数 > 默认值
+# 通过 --config、--read-json 或 PINGDOWN_CONFIG 指定配置文件时
+命令行参数 > 配置文件 > 默认值
 
-# 未使用 --config（纯命令行）
+# 仅使用命令行参数
 命令行参数 > 默认值
 ```
+
+可以使用 `PINGDOWN_CONFIG` 环境变量指定配置文件路径（`--config` 优先级更高）。命令行参数始终优先于文件中的值。
 
 ### JSON 规范
 ```json
